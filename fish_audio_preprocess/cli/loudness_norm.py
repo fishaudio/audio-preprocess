@@ -1,7 +1,8 @@
+import os
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
 import click
-import soundfile as sf
 from loguru import logger
 from tqdm import tqdm
 
@@ -32,6 +33,13 @@ from fish_audio_preprocess.utils.file import AUDIO_EXTENSIONS, list_files, make_
     show_default=True,
     type=float,
 )
+@click.option(
+    "--num-workers",
+    help="Number of workers to use for processing, defaults to number of CPU cores",
+    default=os.cpu_count(),
+    show_default=True,
+    type=int,
+)
 def loudness_norm(
     input_dir: str,
     output_dir: str,
@@ -40,12 +48,11 @@ def loudness_norm(
     clean: bool,
     peak: float,
     loudness: float,
+    num_workers: int,
 ):
     """Perform loudness normalization (ITU-R BS.1770-4) on audio files."""
 
-    from fish_audio_preprocess.utils.loudness_norm import (
-        loudness_norm as _loudness_norm,
-    )
+    from fish_audio_preprocess.utils.loudness_norm import loudness_norm_file
 
     input_dir, output_dir = Path(input_dir), Path(output_dir)
     make_dirs(output_dir, clean)
@@ -54,21 +61,28 @@ def loudness_norm(
     logger.info(f"Found {len(files)} files, normalizing loudness")
 
     skipped = 0
-    for file in tqdm(files):
-        # Get relative path to input_dir
-        relative_path = file.relative_to(input_dir)
-        new_file = output_dir / relative_path
 
-        if new_file.parent.exists() is False:
-            new_file.parent.mkdir(parents=True)
+    with ProcessPoolExecutor(max_workers=num_workers) as executor:
+        tasks = []
 
-        if new_file.exists() and overwrite is False:
-            skipped += 1
-            continue
+        for file in tqdm(files, desc="Preparing tasks"):
+            # Get relative path to input_dir
+            relative_path = file.relative_to(input_dir)
+            new_file = output_dir / relative_path
 
-        audio, rate = sf.read(file)
-        audio = _loudness_norm(audio, rate, peak, loudness)
-        sf.write(new_file, audio, rate)
+            if new_file.parent.exists() is False:
+                new_file.parent.mkdir(parents=True)
+
+            if new_file.exists() and overwrite is False:
+                skipped += 1
+                continue
+
+            tasks.append(
+                executor.submit(loudness_norm_file, file, new_file, peak, loudness)
+            )
+
+        for _ in tqdm(as_completed(tasks), total=len(tasks), desc="Processing"):
+            pass
 
     logger.info("Done!")
     logger.info(f"Total: {len(files)}, Skipped: {skipped}")
