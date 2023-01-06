@@ -1,13 +1,11 @@
 from pathlib import Path
 
 import click
-import pyloudnorm as pyln
 import soundfile as sf
 from loguru import logger
 from tqdm import tqdm
 
 from fish_audio_preprocess.utils.file import AUDIO_EXTENSIONS, list_files, make_dirs
-from fish_audio_preprocess.utils.loudness_norm import loudness_norm as _loudness_norm
 
 
 @click.command()
@@ -44,6 +42,10 @@ def loudness_norm(
     loudness: float,
 ):
     """Perform loudness normalization (ITU-R BS.1770-4) on audio files."""
+
+    from fish_audio_preprocess.utils.loudness_norm import (
+        loudness_norm as _loudness_norm,
+    )
 
     input_dir, output_dir = Path(input_dir), Path(output_dir)
     make_dirs(output_dir, clean)

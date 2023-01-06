@@ -1,19 +1,15 @@
 import multiprocessing as mp
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import click
-import torch
 from loguru import logger
 from tqdm import tqdm
 
 from fish_audio_preprocess.utils.file import list_files, make_dirs
-from fish_audio_preprocess.utils.separate_audio import (
-    init_model,
-    load_track,
-    merge_tracks,
-    save_audio,
-    separate_audio,
-)
+
+if TYPE_CHECKING:
+    import torch
 
 
 def worker(
@@ -24,10 +20,18 @@ def worker(
     track: list[str],
     model: str,
     shifts: int,
-    device: torch.device,
+    device: "torch.device",
     shard_idx: int = -1,
     total_shards: int = 1,
 ):
+    from fish_audio_preprocess.utils.separate_audio import (
+        init_model,
+        load_track,
+        merge_tracks,
+        save_audio,
+        separate_audio,
+    )
+
     files = list_files(input_dir, extensions={".wav"}, recursive=recursive)
 
     if shard_idx >= 0:
@@ -111,6 +115,9 @@ def separate(
         model,
         shifts,
     )
+
+    import torch
+
     if torch.cuda.is_available() and torch.cuda.device_count() >= 1:
         logger.info(f"Device has {torch.cuda.device_count()} GPUs, let's use them!")
 
