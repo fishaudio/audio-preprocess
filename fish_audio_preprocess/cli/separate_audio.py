@@ -1,5 +1,4 @@
 import multiprocessing as mp
-import subprocess as sp
 from pathlib import Path
 
 import click
