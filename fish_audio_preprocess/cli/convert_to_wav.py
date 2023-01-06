@@ -63,7 +63,7 @@ def to_wav(
             new_file.parent.mkdir(parents=True)
 
         check_path = (
-            new_file.parent / new_file.name.format(0) if segment > 0 else new_file
+            (new_file.parent / (new_file.name % 0)) if segment > 0 else new_file
         )
         if check_path.exists() and overwrite is False:
             skipped += 1
@@ -72,9 +72,7 @@ def to_wav(
         command = ["ffmpeg", "-i", str(file)]
 
         if segment > 0:
-            command.extend(
-                ["-f", "segment", "-segment_time", str(segment), "-c", "copy"]
-            )
+            command.extend(["-f", "segment", "-segment_time", str(segment)])
 
         command.append(str(new_file))
 
