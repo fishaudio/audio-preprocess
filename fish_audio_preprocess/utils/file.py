@@ -11,7 +11,6 @@ VIDEO_EXTENSIONS = {
     ".mpg",
     ".mpeg",
     ".m4v",
-    ".aac",
 }
 
 AUDIO_EXTENSIONS = {

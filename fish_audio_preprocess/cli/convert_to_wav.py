@@ -5,7 +5,11 @@ from pathlib import Path
 import click
 from tqdm import tqdm
 
-from fish_audio_preprocess.utils.file import VIDEO_EXTENSIONS, list_files
+from fish_audio_preprocess.utils.file import (
+    AUDIO_EXTENSIONS,
+    VIDEO_EXTENSIONS,
+    list_files,
+)
 
 
 @click.command()
@@ -18,7 +22,7 @@ from fish_audio_preprocess.utils.file import VIDEO_EXTENSIONS, list_files
 @click.option(
     "--clean/--no-clean", default=False, help="Clean output directory before processing"
 )
-def video_to_audio(
+def to_wav(
     input_dir: str, output_dir: str, recursive: bool, overwrite: bool, clean: bool
 ):
     input_dir, output_dir = Path(input_dir), Path(output_dir)
@@ -29,11 +33,13 @@ def video_to_audio(
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    files = list_files(input_dir, extensions=VIDEO_EXTENSIONS, recursive=recursive)
+    files = list_files(
+        input_dir, extensions=VIDEO_EXTENSIONS | AUDIO_EXTENSIONS, recursive=recursive
+    )
     click.echo(f"Found {len(files)} video files")
 
     skipped = 0
-    for file in tqdm(files, desc="Converting videos to audio"):
+    for file in tqdm(files, desc="Converting video/audio to wav"):
         # Get relative path to input_dir
         relative_path = file.relative_to(input_dir)
         new_file = (
@@ -61,4 +67,4 @@ def video_to_audio(
 
 
 if __name__ == "__main__":
-    video_to_audio()
+    to_wav()

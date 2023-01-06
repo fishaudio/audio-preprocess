@@ -1,6 +1,6 @@
 import click
 
-from .video_to_audio import video_to_audio
+from .convert_to_wav import to_wav
 
 
 @click.group()
@@ -9,8 +9,8 @@ def cli(debug):
     click.echo(f"Debug mode is {'on' if debug else 'off'}")
 
 
-cli.add_command(video_to_audio)
+cli.add_command(to_wav)
 
 
 if __name__ == "__main__":
-    cli()
+    to_wav()
