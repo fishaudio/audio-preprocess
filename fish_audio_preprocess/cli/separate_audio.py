@@ -1,10 +1,9 @@
-import shutil
-import subprocess as sp
 from pathlib import Path
 
 import click
 import torch
 from loguru import logger
+from tqdm import tqdm
 
 from fish_audio_preprocess.utils.file import list_files, make_dirs
 from fish_audio_preprocess.utils.separate_audio import (
@@ -55,7 +54,7 @@ def separate(
     _model = init_model(model, device)
 
     skipped = 0
-    for idx, file in enumerate(files):
+    for file in tqdm(files):
         # Get relative path to input_dir
         relative_path = file.relative_to(input_dir)
         new_file = output_dir / relative_path
@@ -65,7 +64,6 @@ def separate(
 
         if new_file.exists() and overwrite is False:
             skipped += 1
-            logger.info(f"Skipping existing file: {new_file}")
             continue
 
         source = load_track(_model, file)
@@ -74,8 +72,6 @@ def separate(
         )
         merged = merge_tracks(separated, track)
         save_audio(_model, new_file, merged)
-
-        logger.info(f"Processed {idx + 1}/{len(files)} files")
 
     logger.info(f"Done!")
     logger.info(f"Total: {len(files)}, Skipped: {skipped}")

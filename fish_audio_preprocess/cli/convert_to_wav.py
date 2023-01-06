@@ -3,6 +3,7 @@ from pathlib import Path
 
 import click
 from loguru import logger
+from tqdm import tqdm
 
 from fish_audio_preprocess.utils.file import (
     AUDIO_EXTENSIONS,
@@ -34,7 +35,7 @@ def to_wav(
     logger.info(f"Found {len(files)} files, converting to wav")
 
     skipped = 0
-    for idx, file in enumerate(files):
+    for file in tqdm(files):
         # Get relative path to input_dir
         relative_path = file.relative_to(input_dir)
         new_file = (
@@ -48,7 +49,6 @@ def to_wav(
 
         if new_file.exists() and overwrite is False:
             skipped += 1
-            logger.info(f"Skipping existing file: {new_file}")
             continue
 
         sp.check_call(
@@ -56,8 +56,6 @@ def to_wav(
             stdout=sp.DEVNULL,
             stderr=sp.DEVNULL,
         )
-
-        logger.info(f"Processed {idx + 1}/{len(files)} files")
 
     logger.info(f"Done!")
     logger.info(f"Total: {len(files)}, Skipped: {skipped}")
