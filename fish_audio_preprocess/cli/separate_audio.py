@@ -1,3 +1,5 @@
+import multiprocessing as mp
+import subprocess as sp
 from pathlib import Path
 
 import click
@@ -13,6 +15,56 @@ from fish_audio_preprocess.utils.separate_audio import (
     save_audio,
     separate_audio,
 )
+
+
+def worker(
+    input_dir: str,
+    output_dir: str,
+    recursive: bool,
+    overwrite: bool,
+    track: list[str],
+    model: str,
+    shifts: int,
+    device: torch.device,
+    shard_idx: int = -1,
+    total_shards: int = 1,
+):
+    files = list_files(input_dir, extensions={".wav"}, recursive=recursive)
+
+    if shard_idx >= 0:
+        files = [f for i, f in enumerate(files) if i % total_shards == shard_idx]
+
+    shard_name = f"[Shard {shard_idx + 1}/{total_shards}]"
+    logger.info(f"{shard_name} Found {len(files)} files, separating audio")
+
+    _model = init_model(model, device)
+
+    skipped = 0
+    for file in tqdm(
+        files,
+        desc=f"{shard_name} Separating audio",
+        position=0 if shard_idx < 0 else shard_idx,
+        leave=False,
+    ):
+        # Get relative path to input_dir
+        relative_path = file.relative_to(input_dir)
+        new_file = output_dir / relative_path
+
+        if new_file.parent.exists() is False:
+            new_file.parent.mkdir(parents=True)
+
+        if new_file.exists() and overwrite is False:
+            skipped += 1
+            continue
+
+        source = load_track(_model, file)
+        separated = separate_audio(_model, source, shifts=shifts, num_workers=0)
+        merged = merge_tracks(separated, track)
+        save_audio(_model, new_file, merged)
+
+    logger.info(f"Done!")
+    logger.info(f"Total: {len(files)}, Skipped: {skipped}")
+    logger.info(f"Output directory: {output_dir}")
 
 
 @click.command()
@@ -32,7 +84,7 @@ from fish_audio_preprocess.utils.separate_audio import (
 @click.option(
     "--shifts", help="Number of shifts, improves separation quality a bit", default=1
 )
-@click.option("--num_workers", help="Number of workers", default=0)
+@click.option("--num_workers_per_gpu", help="Number of workers per GPU", default=2)
 def separate(
     input_dir: str,
     output_dir: str,
@@ -42,7 +94,7 @@ def separate(
     track: list[str],
     model: str,
     shifts: int,
-    num_workers: int,
+    num_workers_per_gpu: int,
 ):
     """
     Separates audio in input_dir using model and saves to output_dir.
@@ -51,35 +103,49 @@ def separate(
     input_dir, output_dir = Path(input_dir), Path(output_dir)
     make_dirs(output_dir, clean)
 
-    files = list_files(input_dir, extensions={".wav"}, recursive=recursive)
-    logger.info(f"Found {len(files)} files, separating audio")
+    if torch.cuda.is_available() and torch.cuda.device_count() >= 1:
+        logger.info(f"Device has {torch.cuda.device_count()} GPUs, let's use them!")
+
+        mp.set_start_method("spawn")
+
+        processes = []
+        shards = torch.cuda.device_count() * num_workers_per_gpu
+        for shard_idx in range(shards):
+            p = mp.Process(
+                target=worker,
+                args=(
+                    input_dir,
+                    output_dir,
+                    recursive,
+                    overwrite,
+                    track,
+                    model,
+                    shifts,
+                    torch.device(f"cuda:{shard_idx % torch.cuda.device_count()}"),
+                    shard_idx,
+                    shards,
+                ),
+            )
+            p.start()
+            processes.append(p)
+
+        for p in processes:
+            p.join()
+
+        return
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    _model = init_model(model, device)
-
-    skipped = 0
-    for file in tqdm(files):
-        # Get relative path to input_dir
-        relative_path = file.relative_to(input_dir)
-        new_file = output_dir / relative_path
-
-        if new_file.parent.exists() is False:
-            new_file.parent.mkdir(parents=True)
-
-        if new_file.exists() and overwrite is False:
-            skipped += 1
-            continue
-
-        source = load_track(_model, file)
-        separated = separate_audio(
-            _model, source, shifts=shifts, num_workers=num_workers
-        )
-        merged = merge_tracks(separated, track)
-        save_audio(_model, new_file, merged)
-
-    logger.info(f"Done!")
-    logger.info(f"Total: {len(files)}, Skipped: {skipped}")
-    logger.info(f"Output directory: {output_dir}")
+    worker(
+        input_dir,
+        output_dir,
+        recursive,
+        overwrite,
+        clean,
+        track,
+        model,
+        shifts,
+        device,
+    )
 
 
 if __name__ == "__main__":
