@@ -44,6 +44,10 @@ def separate(
     shifts: int,
     num_workers: int,
 ):
+    """
+    Separates audio in input_dir using model and saves to output_dir.
+    """
+
     input_dir, output_dir = Path(input_dir), Path(output_dir)
     make_dirs(output_dir, clean)
 

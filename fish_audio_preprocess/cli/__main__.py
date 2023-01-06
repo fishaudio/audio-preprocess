@@ -1,4 +1,5 @@
 import click
+from loguru import logger
 
 from .convert_to_wav import to_wav
 from .separate_audio import separate
@@ -8,7 +9,7 @@ from .separate_audio import separate
 @click.option("--debug/--no-debug", default=False)
 def cli(debug: bool):
     if debug:
-        click.echo(f"Debug mode is on")
+        logger.info(f"Debug mode is on")
 
 
 # Register subcommands

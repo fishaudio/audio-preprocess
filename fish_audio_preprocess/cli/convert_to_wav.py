@@ -26,6 +26,8 @@ from fish_audio_preprocess.utils.file import (
 def to_wav(
     input_dir: str, output_dir: str, recursive: bool, overwrite: bool, clean: bool
 ):
+    """Converts all audio and video files in input_dir to wav files in output_dir."""
+
     input_dir, output_dir = Path(input_dir), Path(output_dir)
     make_dirs(output_dir, clean)
 
