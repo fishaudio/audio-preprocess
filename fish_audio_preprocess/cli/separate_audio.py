@@ -103,6 +103,15 @@ def separate(
     input_dir, output_dir = Path(input_dir), Path(output_dir)
     make_dirs(output_dir, clean)
 
+    base_args = (
+        input_dir,
+        output_dir,
+        recursive,
+        overwrite,
+        track,
+        model,
+        shifts,
+    )
     if torch.cuda.is_available() and torch.cuda.device_count() >= 1:
         logger.info(f"Device has {torch.cuda.device_count()} GPUs, let's use them!")
 
@@ -114,13 +123,7 @@ def separate(
             p = mp.Process(
                 target=worker,
                 args=(
-                    input_dir,
-                    output_dir,
-                    recursive,
-                    overwrite,
-                    track,
-                    model,
-                    shifts,
+                    *base_args,
                     torch.device(f"cuda:{shard_idx % torch.cuda.device_count()}"),
                     shard_idx,
                     shards,
@@ -134,17 +137,9 @@ def separate(
 
         return
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     worker(
-        input_dir,
-        output_dir,
-        recursive,
-        overwrite,
-        clean,
-        track,
-        model,
-        shifts,
-        device,
+        *base_args,
+        torch.device("cuda" if torch.cuda.is_available() else "cpu"),
     )
 
 
