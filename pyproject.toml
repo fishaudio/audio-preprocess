@@ -15,6 +15,7 @@ black = "^22.12.0"
 tqdm = "^4.64.1"
 demucs = "^4.0.0"
 loguru = "^0.6.0"
+pyloudnorm = "^0.1.1"
 
 [tool.poetry.dev-dependencies]
 isort = "^5.11.4"
