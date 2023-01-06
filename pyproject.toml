@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "fish-audio-preprocess"
+version = "0.1.0"
+description = "Preprocess audio data"
+authors = ["Lengyue <lengyue@lengyue.me>"]
+license = "Apache"
+
+packages = [
+    { include = "fish_audio_preprocess" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+black = "^22.12.0"
+
+[tool.poetry.dev-dependencies]
+isort = "^5.11.4"
+black = "^22.12.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
