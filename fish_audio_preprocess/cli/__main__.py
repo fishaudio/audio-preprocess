@@ -2,6 +2,7 @@ import click
 from loguru import logger
 
 from .convert_to_wav import to_wav
+from .length import length
 from .loudness_norm import loudness_norm
 from .separate_audio import separate
 
@@ -17,6 +18,7 @@ def cli(debug: bool):
 cli.add_command(to_wav)
 cli.add_command(separate)
 cli.add_command(loudness_norm)
+cli.add_command(length)
 
 
 if __name__ == "__main__":
