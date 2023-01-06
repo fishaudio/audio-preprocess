@@ -55,7 +55,11 @@ def load_track(
 
 
 def separate_audio(
-    model: torch.nn.Module, audio: torch.Tensor, shifts: int = 1, num_workers: int = 0
+    model: torch.nn.Module,
+    audio: torch.Tensor,
+    shifts: int = 1,
+    num_workers: int = 0,
+    progress: bool = False,
 ) -> dict[str, torch.Tensor]:
     """
     Separate audio into sources
@@ -63,6 +67,7 @@ def separate_audio(
     :param audio: The audio
     :param shifts: Run the model N times, larger values will increase the quality but also the time
     :param num_workers: Number of workers to use
+    :param progress: Show progress bar
 
     :return: The separated audio
     """
@@ -79,7 +84,7 @@ def separate_audio(
         shifts=shifts,
         split=True,
         overlap=0.25,
-        progress=False,
+        progress=progress,
         num_workers=num_workers,
     )[0]
 
@@ -135,7 +140,7 @@ if __name__ == "__main__":
         "data/sources/其他素材/鸡你太美原曲《只因你太美》完整版-.wav",
     )
 
-    tracks = separate_audio(model, audio, shifts=1, num_workers=0)
+    tracks = separate_audio(model, audio, shifts=1, num_workers=0, progress=True)
     print(tracks.keys())
     print(tracks["vocals"])
 
