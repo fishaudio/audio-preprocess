@@ -3,6 +3,7 @@ import subprocess as sp
 from pathlib import Path
 
 import click
+from loguru import logger
 from tqdm import tqdm
 
 from fish_audio_preprocess.utils.file import (
@@ -27,19 +28,22 @@ def to_wav(
 ):
     input_dir, output_dir = Path(input_dir), Path(output_dir)
 
-    if output_dir.exists() and clean:
-        click.echo(f"Cleaning output directory: {output_dir}")
-        shutil.rmtree(output_dir)
+    if output_dir.exists():
+        if clean:
+            logger.info(f"Cleaning output directory: {output_dir}")
+            shutil.rmtree(output_dir)
+        else:
+            logger.info(f"Output directory already exists: {output_dir}")
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
     files = list_files(
         input_dir, extensions=VIDEO_EXTENSIONS | AUDIO_EXTENSIONS, recursive=recursive
     )
-    click.echo(f"Found {len(files)} video files")
+    logger.info(f"Found {len(files)} files, converting to wav")
 
     skipped = 0
-    for file in tqdm(files, desc="Converting video/audio to wav"):
+    for idx, file in enumerate(files):
         # Get relative path to input_dir
         relative_path = file.relative_to(input_dir)
         new_file = (
@@ -53,6 +57,7 @@ def to_wav(
 
         if new_file.exists() and overwrite is False:
             skipped += 1
+            logger.info(f"Skipping existing file: {new_file}")
             continue
 
         sp.check_call(
@@ -61,9 +66,11 @@ def to_wav(
             stderr=sp.DEVNULL,
         )
 
-    click.echo(f"Done!")
-    click.echo(f"Total: {len(files)}, Skipped: {skipped}")
-    click.echo(f"Output directory: {output_dir}")
+        logger.info(f"Processed {idx + 1}/{len(files)} files")
+
+    logger.info(f"Done!")
+    logger.info(f"Total: {len(files)}, Skipped: {skipped}")
+    logger.info(f"Output directory: {output_dir}")
 
 
 if __name__ == "__main__":
