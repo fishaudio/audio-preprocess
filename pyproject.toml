@@ -6,16 +6,20 @@ authors = ["Lengyue <lengyue@lengyue.me>"]
 license = "Apache"
 
 packages = [
-    { include = "fish_audio_preprocess" },
+    { include = "fish_audio_preprocess"},
 ]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 black = "^22.12.0"
+tqdm = "^4.64.1"
 
 [tool.poetry.dev-dependencies]
 isort = "^5.11.4"
 black = "^22.12.0"
+
+[tool.poetry.scripts]
+fap = "fish_audio_preprocess.cli.__main__:cli"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
