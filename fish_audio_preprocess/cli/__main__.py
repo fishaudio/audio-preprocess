@@ -5,10 +5,12 @@ from .convert_to_wav import to_wav
 
 @click.group()
 @click.option("--debug/--no-debug", default=False)
-def cli(debug):
-    click.echo(f"Debug mode is {'on' if debug else 'off'}")
+def cli(debug: bool):
+    if debug:
+        click.echo(f"Debug mode is on")
 
 
+# Register subcommands
 cli.add_command(to_wav)
 
 
