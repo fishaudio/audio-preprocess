@@ -1,5 +1,8 @@
+import shutil
 from pathlib import Path
 from typing import Union
+
+from loguru import logger
 
 VIDEO_EXTENSIONS = {
     ".mp4",
@@ -62,3 +65,23 @@ def list_files(
         files = sorted(files)
 
     return files
+
+
+def make_dirs(path: Union[Path, str], clean: bool = False):
+    """Make directories.
+
+    Args:
+        path (Union[Path, str]): Path to the directory.
+        clean (bool, optional): Whether to clean the directory. Defaults to False.
+    """
+    if isinstance(path, str):
+        path = Path(path)
+
+    if path.exists():
+        if clean:
+            logger.info(f"Cleaning output directory: {path}")
+            shutil.rmtree(path)
+        else:
+            logger.info(f"Output directory already exists: {path}")
+
+    path.mkdir(parents=True, exist_ok=True)

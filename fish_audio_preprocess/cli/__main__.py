@@ -1,6 +1,7 @@
 import click
 
 from .convert_to_wav import to_wav
+from .separate_audio import separate
 
 
 @click.group()
@@ -12,6 +13,7 @@ def cli(debug: bool):
 
 # Register subcommands
 cli.add_command(to_wav)
+cli.add_command(separate)
 
 
 if __name__ == "__main__":

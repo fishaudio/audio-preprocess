@@ -1,15 +1,14 @@
-import shutil
 import subprocess as sp
 from pathlib import Path
 
 import click
 from loguru import logger
-from tqdm import tqdm
 
 from fish_audio_preprocess.utils.file import (
     AUDIO_EXTENSIONS,
     VIDEO_EXTENSIONS,
     list_files,
+    make_dirs,
 )
 
 
@@ -27,15 +26,7 @@ def to_wav(
     input_dir: str, output_dir: str, recursive: bool, overwrite: bool, clean: bool
 ):
     input_dir, output_dir = Path(input_dir), Path(output_dir)
-
-    if output_dir.exists():
-        if clean:
-            logger.info(f"Cleaning output directory: {output_dir}")
-            shutil.rmtree(output_dir)
-        else:
-            logger.info(f"Output directory already exists: {output_dir}")
-
-    output_dir.mkdir(parents=True, exist_ok=True)
+    make_dirs(output_dir, clean)
 
     files = list_files(
         input_dir, extensions=VIDEO_EXTENSIONS | AUDIO_EXTENSIONS, recursive=recursive
