@@ -51,7 +51,7 @@ def loudness_norm(
     make_dirs(output_dir, clean)
 
     files = list_files(input_dir, extensions=AUDIO_EXTENSIONS, recursive=recursive)
-    logger.info(f"Found {len(files)} files, converting to wav")
+    logger.info(f"Found {len(files)} files, normalizing loudness")
 
     skipped = 0
     for file in tqdm(files):
