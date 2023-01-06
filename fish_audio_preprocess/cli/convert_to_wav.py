@@ -23,8 +23,19 @@ from fish_audio_preprocess.utils.file import (
 @click.option(
     "--clean/--no-clean", default=False, help="Clean output directory before processing"
 )
+@click.option(
+    "--segment",
+    help="Maximum segment length in seconds",
+    default=60 * 30,
+    show_default=True,
+)
 def to_wav(
-    input_dir: str, output_dir: str, recursive: bool, overwrite: bool, clean: bool
+    input_dir: str,
+    output_dir: str,
+    recursive: bool,
+    overwrite: bool,
+    clean: bool,
+    segment: int,
 ):
     """Converts all audio and video files in input_dir to wav files in output_dir."""
 
@@ -43,18 +54,29 @@ def to_wav(
         new_file = (
             output_dir
             / relative_path.parent
-            / relative_path.name.replace(file.suffix, ".wav")
+            / relative_path.name.replace(file.suffix, "_%04d.wav")
         )
 
         if new_file.parent.exists() is False:
             new_file.parent.mkdir(parents=True)
 
-        if new_file.exists() and overwrite is False:
+        if (new_file.parent / new_file.name.format(0)).exists() and overwrite is False:
             skipped += 1
             continue
 
         sp.check_call(
-            ["ffmpeg", "-i", str(file), "-y", str(new_file)],
+            [
+                "ffmpeg",
+                "-i",
+                str(file),
+                "-f",
+                "segment",
+                "-segment_time",
+                str(segment),
+                "-c",
+                "copy",
+                str(new_file),
+            ],
             stdout=sp.DEVNULL,
             stderr=sp.DEVNULL,
         )
