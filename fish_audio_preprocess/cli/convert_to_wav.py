@@ -25,7 +25,7 @@ from fish_audio_preprocess.utils.file import (
 )
 @click.option(
     "--segment",
-    help="Maximum segment length in seconds",
+    help="Maximum segment length in seconds, use 0 to disable",
     default=60 * 30,
     show_default=True,
 )
@@ -54,29 +54,32 @@ def to_wav(
         new_file = (
             output_dir
             / relative_path.parent
-            / relative_path.name.replace(file.suffix, "_%04d.wav")
+            / relative_path.name.replace(
+                file.suffix, "_%04d.wav" if segment > 0 else ".wav"
+            )
         )
 
         if new_file.parent.exists() is False:
             new_file.parent.mkdir(parents=True)
 
-        if (new_file.parent / new_file.name.format(0)).exists() and overwrite is False:
+        check_path = (
+            new_file.parent / new_file.name.format(0) if segment > 0 else new_file
+        )
+        if check_path.exists() and overwrite is False:
             skipped += 1
             continue
 
+        command = ["ffmpeg", "-i", str(file)]
+
+        if segment > 0:
+            command.extend(
+                ["-f", "segment", "-segment_time", str(segment), "-c", "copy"]
+            )
+
+        command.append(str(new_file))
+
         sp.check_call(
-            [
-                "ffmpeg",
-                "-i",
-                str(file),
-                "-f",
-                "segment",
-                "-segment_time",
-                str(segment),
-                "-c",
-                "copy",
-                str(new_file),
-            ],
+            command,
             stdout=sp.DEVNULL,
             stderr=sp.DEVNULL,
         )
