@@ -1,5 +1,8 @@
+import os
 from collections import Counter
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+from typing import Union
 
 import click
 import librosa
@@ -11,22 +14,51 @@ from tqdm import tqdm
 from fish_audio_preprocess.utils.file import list_files
 
 
+def count_notes_from_file(file: Union[Path, str]) -> Counter:
+    """Count the notes from a file
+
+    Args:
+        file (Union[Path, str]): The file to count the notes from
+
+    Returns:
+        Counter: A counter of the notes
+    """
+
+    import parselmouth as pm
+
+    pitch_ac = pm.Sound(str(file)).to_pitch_ac()
+    f0 = pitch_ac.selected_array["frequency"]
+
+    counter = Counter()
+    for i in f0:
+        if np.isinf(i) or np.isnan(i) or i == 0:
+            continue
+
+        counter[librosa.hz_to_note(i)] += 1
+
+    return counter
+
+
 @click.command()
 @click.argument("input_dir", type=click.Path(exists=True, file_okay=False))
 @click.option("--recursive/--no-recursive", default=True, help="Search recursively")
 @click.option(
     "--visualize/--no-visualize", default=True, help="Visualize the distribution"
 )
+@click.option(
+    "--num-workers",
+    default=os.cpu_count(),
+    help="Number of workers for parallel processing",
+)
 def frequency(
     input_dir: str,
     recursive: bool,
     visualize: bool,
+    num_workers: int,
 ):
     """
     Get the frequency of all audio files in a directory
     """
-
-    import parselmouth as pm
 
     input_dir = Path(input_dir)
     files = list_files(input_dir, {".wav"}, recursive=recursive)
@@ -34,15 +66,16 @@ def frequency(
 
     counter = Counter()
 
-    for file in tqdm(files, desc="Collecting infos"):
-        pitch_ac = pm.Sound(str(file)).to_pitch_ac()
-        f0 = pitch_ac.selected_array["frequency"]
+    with ProcessPoolExecutor(max_workers=num_workers) as executor:
+        tasks = []
 
-        for i in f0:
-            if np.isinf(i) or np.isnan(i) or i == 0:
-                continue
+        for file in tqdm(files, desc="Preparing"):
+            tasks.append(executor.submit(count_notes_from_file, file))
 
-            counter[librosa.hz_to_note(i)] += 1
+        for task in tqdm(
+            as_completed(tasks), desc="Collecting infos", total=len(tasks)
+        ):
+            counter += task.result()
 
     data = sorted(counter.items(), key=lambda kv: kv[1], reverse=True)
 
