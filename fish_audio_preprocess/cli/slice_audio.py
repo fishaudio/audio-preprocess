@@ -28,20 +28,13 @@ from fish_audio_preprocess.utils.file import AUDIO_EXTENSIONS, list_files, make_
 )
 @click.option(
     "--min-duration",
-    help="Minimum duration of each non-silent interval to be considered",
-    default=3.0,
-    show_default=True,
-    type=float,
-)
-@click.option(
-    "--slice-min-duration",
     help="Minimum duration of each slice",
     default=6.0,
     show_default=True,
     type=float,
 )
 @click.option(
-    "--slice-max-duration",
+    "--max-duration",
     help="Maximum duration of each slice",
     default=30.0,
     show_default=True,
@@ -83,8 +76,7 @@ def slice_audio(
     clean: bool,
     num_workers: int,
     min_duration: float,
-    slice_min_duration: float,
-    slice_max_duration: float,
+    max_duration: float,
     pad_silence: float,
     top_db: int,
     frame_length: int,
@@ -123,8 +115,7 @@ def slice_audio(
                     input_file=file,
                     output_dir=save_path,
                     min_duration=min_duration,
-                    slice_min_duration=slice_min_duration,
-                    slice_max_duration=slice_max_duration,
+                    max_duration=max_duration,
                     pad_silence=pad_silence,
                     top_db=top_db,
                     frame_length=frame_length,
