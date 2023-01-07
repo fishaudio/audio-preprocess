@@ -12,8 +12,9 @@ from loguru import logger
 def slice_audio(
     audio: np.ndarray,
     rate: int,
-    min_duration: float = 6.0,
-    max_duration: float = 30.0,
+    min_duration: float = 3.0,
+    slice_min_duration: float = 6.0,
+    slice_max_duration: float = 30.0,
     pad_silence: float = 0.4,
     top_db: int = 60,
     frame_length: int = 2048,
@@ -24,8 +25,9 @@ def slice_audio(
     Args:
         audio: audio data, in shape (samples, channels)
         rate: sample rate
-        min_duration: minimum duration of each slice
-        max_duration: maximum duration of each slice
+        min_duration: minimum duration of each non-silent interval to be considered
+        slice_min_duration: minimum duration of each slice
+        slice_max_duration: maximum duration of each slice
         pad_silence: pad silence between each non-silent slice
         top_db: top_db of librosa.effects.split
         frame_length: frame_length of librosa.effects.split
@@ -35,7 +37,7 @@ def slice_audio(
         Iterable of sliced audio
     """
 
-    if len(audio) / rate < min_duration:
+    if len(audio) / rate < slice_min_duration:
         return audio
 
     intervals = librosa.effects.split(
@@ -49,15 +51,19 @@ def slice_audio(
     for start, end in intervals:
         time = (end - start) / rate
 
+        # Skip empty intervals
+        if time < min_duration:
+            continue
+
         duration += time
         arr.append(audio[start:end])
 
-        if duration >= min_duration:
+        if duration >= slice_min_duration:
             duration = 0
             _gen = np.concatenate(arr)
             arr = []
 
-            if len(_gen) > max_duration * rate:
+            if len(_gen) > slice_max_duration * rate:
                 # Evenly split _gen into multiple slices
                 n_chunks = math.ceil(len(_gen) / (max_duration * rate))
                 chunk_size = len(_gen) // n_chunks
@@ -84,9 +90,10 @@ def slice_audio(
 
 def slice_audio_file(
     input_file: Union[str, Path],
-    output_folder: Union[str, Path],
-    min_duration: float = 6.0,
-    max_duration: float = 30.0,
+    output_dir: Union[str, Path],
+    min_duration: float = 3.0,
+    slice_min_duration: float = 6.0,
+    slice_max_duration: float = 30.0,
     pad_silence: float = 0.4,
     top_db: int = 60,
     frame_length: int = 2048,
@@ -97,17 +104,18 @@ def slice_audio_file(
 
     Args:
         input_file: input audio file
-        output_folder: output folder
-        min_duration: minimum duration of each slice
-        max_duration: maximum duration of each slice
+        output_dir: output folder
+        min_duration: minimum duration of each non-silent interval to be considered
+        slice_min_duration: minimum duration of each slice
+        slice_max_duration: maximum duration of each slice
         pad_silence: pad silence between each non-silent slice
         top_db: top_db of librosa.effects.split
         frame_length: frame_length of librosa.effects.split
         hop_length: hop_length of librosa.effects.split
     """
 
-    output_folder = Path(output_folder)
-    output_folder.mkdir(parents=True, exist_ok=True)
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     audio, rate = sf.read(input_file)
     for idx, sliced in enumerate(
@@ -115,11 +123,12 @@ def slice_audio_file(
             audio,
             rate,
             min_duration=min_duration,
-            max_duration=max_duration,
+            slice_min_duration=slice_min_duration,
+            slice_max_duration=slice_max_duration,
             pad_silence=pad_silence,
             top_db=top_db,
             frame_length=frame_length,
             hop_length=hop_length,
         )
     ):
-        sf.write(output_folder / f"{idx:04d}.wav", sliced, rate)
+        sf.write(output_dir / f"{idx:04d}.wav", sliced, rate)

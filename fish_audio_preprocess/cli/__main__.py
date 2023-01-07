@@ -7,6 +7,7 @@ from .loudness_norm import loudness_norm
 from .separate_audio import separate
 from .slice_audio import slice_audio
 
+
 @click.group()
 @click.option("--debug/--no-debug", default=False)
 def cli(debug: bool):
