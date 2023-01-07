@@ -65,8 +65,7 @@ def slice_audio(
         audio.T, top_db=top_db, frame_length=frame_length, hop_length=hop_length
     )
 
-    arr = []
-    duration = 0
+    arr, duration = [], 0
 
     for start, end in intervals:
         time = (end - start) / rate
@@ -75,10 +74,10 @@ def slice_audio(
         arr.append(audio[start:end])
 
         if duration >= min_duration:
-            duration = 0
             _gen = np.concatenate(arr)
-            arr = []
+            arr, duration = [], 0
             yield from slice_by_max_duration(_gen, max_duration, rate)
+            continue
 
         if len(audio.shape) == 1:
             silent_shape = int(rate * pad_silence)
@@ -86,10 +85,6 @@ def slice_audio(
             silent_shape = (int(rate * pad_silence), audio.shape[1])
 
         arr.append(np.zeros(silent_shape, dtype=audio.dtype))
-
-    if duration >= min_duration:
-        _gen = np.concatenate(arr)
-        yield from slice_by_max_duration(_gen, max_duration, rate)
 
 
 def slice_audio_file(
