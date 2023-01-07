@@ -9,12 +9,15 @@ import soundfile as sf
 def loudness_norm(audio: np.ndarray, rate: int, peak=-1.0, loudness=-23.0):
     """
     Perform loudness normalization (ITU-R BS.1770-4) on audio files.
-    :param audio: audio data
-    :param rate: sample rate
-    :param peak: peak normalize audio to N dB, default -1.0 dB
-    :param loudness: loudness normalize audio to N dB LUFS, default -23.0 dB LUFS
 
-    :return: loudness normalized audio
+    Args:
+        audio: audio data
+        rate: sample rate
+        peak: peak normalize audio to N dB. Defaults to -1.0.
+        loudness: loudness normalize audio to N dB LUFS. Defaults to -23.0.
+
+    Returns:
+        loudness normalized audio
     """
 
     # peak normalize audio to [peak] dB
@@ -38,10 +41,12 @@ def loudness_norm_file(
 ) -> None:
     """
     Perform loudness normalization (ITU-R BS.1770-4) on audio files.
-    :param input_file: input audio file
-    :param output_file: output audio file
-    :param peak: peak normalize audio to N dB, default -1.0 dB
-    :param loudness: loudness normalize audio to N dB LUFS, default -23.0 dB LUFS
+
+    Args:
+        input_file: input audio file
+        output_file: output audio file
+        peak: peak normalize audio to N dB. Defaults to -1.0.
+        loudness: loudness normalize audio to N dB LUFS. Defaults to -23.0.
     """
 
     audio, rate = sf.read(input_file)

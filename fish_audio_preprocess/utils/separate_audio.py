@@ -16,11 +16,14 @@ def init_model(
 ) -> torch.nn.Module:
     """
     Initialize the model
-    :param name: Name of the model
-    :param device: Device to use
-    :param segment: Set split size of each chunk. This can help save memory of graphic card.
 
-    :return: The model
+    Args:
+        name: Name of the model
+        device: Device to use
+        segment: Set split size of each chunk. This can help save memory of graphic card.
+
+    Returns:
+        The model
     """
 
     model = get_model(name)
@@ -51,6 +54,17 @@ def load_track(
     model: torch.nn.Module,
     path: Union[str, Path],
 ) -> torch.Tensor:
+    """
+    Load audio track
+
+    Args:
+        model: The model
+        path: Path to the audio file
+
+    Returns:
+        The audio
+    """
+
     return _load_track(path, model.audio_channels, model.samplerate)
 
 
@@ -63,13 +77,16 @@ def separate_audio(
 ) -> dict[str, torch.Tensor]:
     """
     Separate audio into sources
-    :param model: The model
-    :param audio: The audio
-    :param shifts: Run the model N times, larger values will increase the quality but also the time
-    :param num_workers: Number of workers to use
-    :param progress: Show progress bar
 
-    :return: The separated audio
+    Args:
+        model: The model
+        audio: The audio
+        shifts: Run the model N times, larger values will increase the quality but also the time
+        num_workers: Number of workers to use
+        progress: Show progress bar
+
+    Returns:
+        The separated tracks
     """
 
     device = next(model.parameters()).device
@@ -98,6 +115,15 @@ def save_audio(
     path: Union[str, Path],
     track: torch.Tensor,
 ) -> None:
+    """
+    Save audio track
+
+    Args:
+        model: The model
+        path: Path to save the audio file
+        track: The audio tracks
+    """
+
     _save_audio(
         track,
         path,
@@ -114,10 +140,13 @@ def merge_tracks(
 ) -> torch.Tensor:
     """
     Merge tracks into one audio
-    :param tracks: The separated audio
-    :param filter: The tracks to merge
 
-    :return: The merged audio
+    Args:
+        tracks: The separated audio tracks
+        filter: The tracks to merge
+
+    Returns:
+        The merged audio
     """
 
     if filter is None:
