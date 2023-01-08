@@ -77,7 +77,7 @@ def process(filename: Path, overwrite: bool = False):
 
         with torch.no_grad():
             c = HUBERT_MODEL.units(wav).transpose(1, 2)
-
+        
         torch.save(c.cpu(), hubert_path)
     else:
         c = torch.load(hubert_path)
