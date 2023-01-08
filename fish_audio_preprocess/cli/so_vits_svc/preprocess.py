@@ -2,7 +2,6 @@
 本文件大量复制自 so_vits_svc, 如果有 shit code, 请原谅我
 """
 
-import os
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import Lock, Value
 from pathlib import Path
