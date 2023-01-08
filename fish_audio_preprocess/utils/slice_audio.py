@@ -114,7 +114,7 @@ def slice_audio_file(
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    audio, rate = sf.read(input_file)
+    audio, rate = sf.read(str(input_file))
     for idx, sliced in enumerate(
         slice_audio(
             audio,
@@ -127,4 +127,4 @@ def slice_audio_file(
             hop_length=hop_length,
         )
     ):
-        sf.write(output_dir / f"{idx:04d}.wav", sliced, rate)
+        sf.write(str(output_dir / f"{idx:04d}.wav"), sliced, rate)

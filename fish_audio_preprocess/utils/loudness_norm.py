@@ -49,6 +49,11 @@ def loudness_norm_file(
         loudness: loudness normalize audio to N dB LUFS. Defaults to -23.0.
     """
 
+    # Thanks to .against's feedback
+    # https://github.com/librosa/librosa/issues/1236
+
+    input_file, output_file = str(input_file), str(output_file)
+
     audio, rate = sf.read(input_file)
     audio = loudness_norm(audio, rate, peak, loudness)
     sf.write(output_file, audio, rate)
