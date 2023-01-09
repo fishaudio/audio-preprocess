@@ -11,3 +11,13 @@
 - [x] so-vits-svc 数据集处理
 
 ([ ] 表示未完成, [x] 表示已完成)
+
+To start
+
+```
+pip install -e .
+```
+
+```
+fap --help
+```

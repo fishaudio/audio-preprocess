@@ -30,7 +30,7 @@ def length(
 
     infos = []
     for file in tqdm(files, desc="Collecting infos"):
-        sound = sf.SoundFile(file)
+        sound = sf.SoundFile(str(file))
         infos.append((len(sound), sound.samplerate, len(sound) / sound.samplerate))
 
     # Duration

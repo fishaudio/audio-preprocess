@@ -112,7 +112,7 @@ def slice_audio(
             tasks.append(
                 executor.submit(
                     slice_audio_file,
-                    input_file=file,
+                    input_file=str(file),
                     output_dir=save_path,
                     min_duration=min_duration,
                     max_duration=max_duration,
@@ -123,7 +123,9 @@ def slice_audio(
                 )
             )
 
-        for _ in tqdm(as_completed(tasks), total=len(tasks), desc="Processing"):
+        # fixed skipping errors
+        for i in tqdm(as_completed(tasks), total=len(tasks), desc="Processing"):
+            # print("Processing", i)
             pass
 
     logger.info("Done!")
