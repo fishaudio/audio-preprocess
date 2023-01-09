@@ -12,12 +12,11 @@
 
 ([ ] 表示未完成, [x] 表示已完成)
 
-To start
+**本代码已在 Ubuntu 22.04 / 20.04 + Python 3.10 测试过, 如果在其他版本遇到问题, 欢迎反馈**
+
+## 上手指南:
 
 ```
-pip install -e .
-```
-
-```
+pip install -e . 
 fap --help
 ```
