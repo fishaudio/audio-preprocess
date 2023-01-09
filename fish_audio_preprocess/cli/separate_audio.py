@@ -32,7 +32,7 @@ def worker(
         separate_audio,
     )
 
-    files = list_files(input_dir, extensions={".wav"}, recursive=recursive)
+    files = list_files(input_dir, extensions={".wav", ".aac"}, recursive=recursive)
 
     if shard_idx >= 0:
         files = [f for i, f in enumerate(files) if i % total_shards == shard_idx]
