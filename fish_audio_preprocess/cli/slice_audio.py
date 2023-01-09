@@ -123,10 +123,8 @@ def slice_audio(
                 )
             )
 
-        # fixed skipping errors
         for i in tqdm(as_completed(tasks), total=len(tasks), desc="Processing"):
-            # print("Processing", i)
-            pass
+            assert i.exception() is None
 
     logger.info("Done!")
     logger.info(f"Total: {len(files)}, Skipped: {skipped}")

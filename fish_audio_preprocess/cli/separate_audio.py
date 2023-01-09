@@ -6,7 +6,7 @@ import click
 from loguru import logger
 from tqdm import tqdm
 
-from fish_audio_preprocess.utils.file import list_files, make_dirs
+from fish_audio_preprocess.utils.file import AUDIO_EXTENSIONS, list_files, make_dirs
 
 if TYPE_CHECKING:
     import torch
@@ -32,7 +32,7 @@ def worker(
         separate_audio,
     )
 
-    files = list_files(input_dir, extensions={".wav", ".aac"}, recursive=recursive)
+    files = list_files(input_dir, extensions=AUDIO_EXTENSIONS, recursive=recursive)
 
     if shard_idx >= 0:
         files = [f for i, f in enumerate(files) if i % total_shards == shard_idx]

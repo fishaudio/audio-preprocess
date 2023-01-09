@@ -81,8 +81,8 @@ def loudness_norm(
                 executor.submit(loudness_norm_file, file, new_file, peak, loudness)
             )
 
-        for _ in tqdm(as_completed(tasks), total=len(tasks), desc="Processing"):
-            pass
+        for i in tqdm(as_completed(tasks), total=len(tasks), desc="Processing"):
+            assert i.exception() is None
 
     logger.info("Done!")
     logger.info(f"Total: {len(files)}, Skipped: {skipped}")

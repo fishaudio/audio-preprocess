@@ -75,6 +75,7 @@ def frequency(
         for task in tqdm(
             as_completed(tasks), desc="Collecting infos", total=len(tasks)
         ):
+            assert task.exception() is None
             counter += task.result()
 
     data = sorted(counter.items(), key=lambda kv: kv[1], reverse=True)
