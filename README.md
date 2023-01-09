@@ -17,3 +17,7 @@ To start
 ```
 pip install -e .
 ```
+
+```
+fap --help
+```
