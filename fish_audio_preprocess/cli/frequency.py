@@ -72,11 +72,11 @@ def frequency(
         for file in tqdm(files, desc="Preparing"):
             tasks.append(executor.submit(count_notes_from_file, file))
 
-        for task in tqdm(
+        for i in tqdm(
             as_completed(tasks), desc="Collecting infos", total=len(tasks)
         ):
-            assert task.exception() is None
-            counter += task.result()
+            assert i.exception() is None, i.exception()
+            counter += i.result()
 
     data = sorted(counter.items(), key=lambda kv: kv[1], reverse=True)
 

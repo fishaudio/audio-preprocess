@@ -82,7 +82,7 @@ def loudness_norm(
             )
 
         for i in tqdm(as_completed(tasks), total=len(tasks), desc="Processing"):
-            assert i.exception() is None
+            assert i.exception() is None, i.exception()
 
     logger.info("Done!")
     logger.info(f"Total: {len(files)}, Skipped: {skipped}")
