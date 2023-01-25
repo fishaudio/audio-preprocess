@@ -6,7 +6,9 @@ import pyloudnorm as pyln
 import soundfile as sf
 
 
-def loudness_norm(audio: np.ndarray, rate: int, peak=-1.0, loudness=-23.0):
+def loudness_norm(
+    audio: np.ndarray, rate: int, peak=-1.0, loudness=-23.0, block_size=0.400
+) -> np.ndarray:
     """
     Perform loudness normalization (ITU-R BS.1770-4) on audio files.
 
@@ -15,6 +17,7 @@ def loudness_norm(audio: np.ndarray, rate: int, peak=-1.0, loudness=-23.0):
         rate: sample rate
         peak: peak normalize audio to N dB. Defaults to -1.0.
         loudness: loudness normalize audio to N dB LUFS. Defaults to -23.0.
+        block_size: block size for loudness measurement. Defaults to 0.400. (400 ms)
 
     Returns:
         loudness normalized audio
@@ -24,7 +27,7 @@ def loudness_norm(audio: np.ndarray, rate: int, peak=-1.0, loudness=-23.0):
     audio = pyln.normalize.peak(audio, peak)
 
     # measure the loudness first
-    meter = pyln.Meter(rate)  # create BS.1770 meter
+    meter = pyln.Meter(rate, block_size=block_size)  # create BS.1770 meter
     _loudness = meter.integrated_loudness(audio)
 
     # loudness normalize audio to [loudness] dB LUFS
@@ -38,6 +41,7 @@ def loudness_norm_file(
     output_file: Union[str, Path],
     peak=-1.0,
     loudness=-23.0,
+    block_size=0.400,
 ) -> None:
     """
     Perform loudness normalization (ITU-R BS.1770-4) on audio files.
@@ -47,6 +51,7 @@ def loudness_norm_file(
         output_file: output audio file
         peak: peak normalize audio to N dB. Defaults to -1.0.
         loudness: loudness normalize audio to N dB LUFS. Defaults to -23.0.
+        block_size: block size for loudness measurement. Defaults to 0.400. (400 ms)
     """
 
     # Thanks to .against's feedback
@@ -55,5 +60,5 @@ def loudness_norm_file(
     input_file, output_file = str(input_file), str(output_file)
 
     audio, rate = sf.read(input_file)
-    audio = loudness_norm(audio, rate, peak, loudness)
+    audio = loudness_norm(audio, rate, peak, loudness, block_size)
     sf.write(output_file, audio, rate)

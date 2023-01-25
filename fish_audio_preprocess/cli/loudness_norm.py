@@ -34,6 +34,13 @@ from fish_audio_preprocess.utils.file import AUDIO_EXTENSIONS, list_files, make_
     type=float,
 )
 @click.option(
+    "--block-size",
+    help="Block size for loudness measurement, unit is second",
+    default=0.400,
+    show_default=True,
+    type=float,
+)
+@click.option(
     "--num-workers",
     help="Number of workers to use for processing, defaults to number of CPU cores",
     default=os.cpu_count(),
@@ -48,6 +55,7 @@ def loudness_norm(
     clean: bool,
     peak: float,
     loudness: float,
+    block_size: float,
     num_workers: int,
 ):
     """Perform loudness normalization (ITU-R BS.1770-4) on audio files."""
@@ -78,7 +86,9 @@ def loudness_norm(
                 continue
 
             tasks.append(
-                executor.submit(loudness_norm_file, file, new_file, peak, loudness)
+                executor.submit(
+                    loudness_norm_file, file, new_file, peak, loudness, block_size
+                )
             )
 
         for i in tqdm(as_completed(tasks), total=len(tasks), desc="Processing"):
