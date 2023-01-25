@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fish-audio-preprocess"
-version = "0.1.1"
+version = "0.1.2"
 description = "Preprocess audio data"
 authors = ["Lengyue <lengyue@lengyue.me>"]
 license = "Apache"
