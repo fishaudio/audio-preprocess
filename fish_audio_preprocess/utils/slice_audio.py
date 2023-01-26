@@ -59,7 +59,6 @@ def slice_audio(
     """
 
     if len(audio) / rate < min_duration:
-        print("Audio too short, skipping")
         return audio
 
     intervals = librosa.effects.split(
