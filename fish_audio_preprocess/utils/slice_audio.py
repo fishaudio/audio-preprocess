@@ -59,7 +59,8 @@ def slice_audio(
     """
 
     if len(audio) / rate < min_duration:
-        return audio
+        yield from slice_by_max_duration(audio, max_duration, rate)
+        return
 
     intervals = librosa.effects.split(
         audio.T, top_db=top_db, frame_length=frame_length, hop_length=hop_length
