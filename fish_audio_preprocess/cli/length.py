@@ -38,6 +38,8 @@ def length(
     avg_duration = total_duration / len(infos)
     logger.info(f"Total duration: {total_duration / 3600:.2f} hours")
     logger.info(f"Average duration: {avg_duration:.2f} seconds")
+    logger.info(f"Max duration: {max([i[2] for i in infos]):.2f} seconds")
+    logger.info(f"Min duration: {min([i[2] for i in infos]):.2f} seconds")
 
     # Sample Rate
     total_samplerate = sum([i[1] for i in infos])
