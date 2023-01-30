@@ -76,7 +76,7 @@ def process(filename: Path, overwrite: bool = False):
 
         with torch.no_grad():
             c = HUBERT_MODEL.units(wav).transpose(1, 2)
-        
+
         torch.save(c.cpu(), hubert_path)
     else:
         c = torch.load(hubert_path)
@@ -131,8 +131,8 @@ def preprocess(
                 )
             )
 
-        for _ in tqdm(as_completed(tasks), total=len(tasks), desc="Processing"):
-            pass
+        for i in tqdm(as_completed(tasks), total=len(tasks), desc="Processing"):
+            assert i.exception() is None, i.exception()
 
     logger.info("Done!")
     logger.info(f"Total: {len(files)}")

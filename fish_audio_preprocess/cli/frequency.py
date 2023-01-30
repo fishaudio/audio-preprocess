@@ -73,10 +73,9 @@ def frequency(
         for file in tqdm(files, desc="Preparing"):
             tasks.append(executor.submit(count_midi_from_file, file))
 
-        for task in tqdm(
-            as_completed(tasks), desc="Collecting infos", total=len(tasks)
-        ):
-            counter += task.result()
+        for i in tqdm(as_completed(tasks), desc="Collecting infos", total=len(tasks)):
+            assert i.exception() is None, i.exception()
+            counter += i.result()
 
     midi = sorted(counter.items(), key=lambda kv: kv[1], reverse=True)
     # change data from midi to note
@@ -90,21 +89,36 @@ def frequency(
     if visualize is False:
         return
 
-    # mark the correct order of notes
-    key_notes = librosa.midi_to_note(list(range(0, 300)), cents=True)
-    if not detail:
-        data = sorted(notes.items(), key=lambda kv: key_notes.index(kv[0]))
-        plt.rcParams["figure.figsize"] = [10, 4]
-        plt.rcParams["figure.autolayout"] = True
-        plt.bar([x[0] for x in notes], [x[1] for x in data])
-        plt.xticks(rotation=90)
-        plt.title("Notes distribution")
-        plt.xlabel("Notes")
-        plt.ylabel("Count")
-        plt.show()
-    else:
-        pass
-        
+    x_axis_order = librosa.midi_to_note(list(range(0, 300)))
+    data = sorted(counter.items(), key=lambda kv: x_axis_order.index(kv[0]))
+
+    plt.rcParams["figure.figsize"] = [10, 4]
+    plt.rcParams["figure.autolayout"] = True
+    plt.bar([x[0] for x in data], [x[1] for x in data])
+    plt.xticks(rotation=90)
+    plt.title("Notes distribution")
+    plt.xlabel("Notes")
+    plt.ylabel("Count")
+
+    # Add grid to the plot
+    plt.grid(axis="y", alpha=0.75)
+    plt.grid(axis="x", alpha=0.75)
+
+    # Add percentage to the plot
+    total = sum([x[1] for x in data])
+    for i, v in enumerate([x[1] for x in data]):
+        if v / total < 0.001:
+            continue
+
+        plt.text(
+            i - 1,
+            v + 1,
+            f"{v / total * 100:.2f}%",
+            color="black",
+            fontweight="bold",
+        )
+
+    plt.show()
 
 
 if __name__ == "__main__":

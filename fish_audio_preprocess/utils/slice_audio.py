@@ -59,8 +59,8 @@ def slice_audio(
     """
 
     if len(audio) / rate < min_duration:
-        print("Audio too short, skipping")
-        return audio
+        yield from slice_by_max_duration(audio, max_duration, rate)
+        return
 
     intervals = librosa.effects.split(
         audio.T, top_db=top_db, frame_length=frame_length, hop_length=hop_length
@@ -128,7 +128,4 @@ def slice_audio_file(
             hop_length=hop_length,
         )
     ):
-        # for debug
-        # print(f"Saving {idx:04d}.wav")
-        # fixed: Path(f"{output_dir}/{idx:04d}.wav") TypeError: Poxipath
-        sf.write(f"{str(output_dir)}/{idx:04d}.wav", sliced, rate)
+        sf.write(str(output_dir / f"{idx:04d}.wav"), sliced, rate)

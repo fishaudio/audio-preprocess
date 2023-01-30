@@ -1,5 +1,7 @@
 # Fish Audio Preprocessor
 
+[![PyPI Version](https://img.shields.io/pypi/v/fish-audio-preprocess.svg)](https://pypi.python.org/pypi/fish-audio-preprocess)
+
 这个 Repo 包含了一些用于处理音频的脚本. 主要包含以下功能:
 
 - [x] 视频/音频转 wav
@@ -12,12 +14,11 @@
 
 ([ ] 表示未完成, [x] 表示已完成)
 
-To start
+**本代码已在 Ubuntu 22.04 / 20.04 + Python 3.10 测试过, 如果在其他版本遇到问题, 欢迎反馈**
+
+## 上手指南:
 
 ```
-pip install -e .
-```
-
-```
+pip install -e . 
 fap --help
 ```
