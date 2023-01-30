@@ -14,7 +14,7 @@ from tqdm import tqdm
 from fish_audio_preprocess.utils.file import list_files
 
 
-def count_notes_from_file(file: Union[Path, str]) -> Counter:
+def count_midi_from_file(file: Union[Path, str]) -> Counter:
     """Count the notes from a file
 
     Args:
@@ -33,8 +33,7 @@ def count_notes_from_file(file: Union[Path, str]) -> Counter:
     for i in f0:
         if np.isinf(i) or np.isnan(i) or i == 0:
             continue
-
-        counter[librosa.hz_to_note(i)] += 1
+        counter[librosa.hz_to_midi(i)] += 1
 
     return counter
 
@@ -50,11 +49,13 @@ def count_notes_from_file(file: Union[Path, str]) -> Counter:
     default=os.cpu_count(),
     help="Number of workers for parallel processing",
 )
+@click.option("--detail", default=False, help="Show detailed between notes")
 def frequency(
     input_dir: str,
     recursive: bool,
     visualize: bool,
     num_workers: int,
+    detail: bool,
 ):
     """
     Get the frequency of all audio files in a directory
@@ -70,32 +71,40 @@ def frequency(
         tasks = []
 
         for file in tqdm(files, desc="Preparing"):
-            tasks.append(executor.submit(count_notes_from_file, file))
+            tasks.append(executor.submit(count_midi_from_file, file))
 
         for task in tqdm(
             as_completed(tasks), desc="Collecting infos", total=len(tasks)
         ):
             counter += task.result()
 
-    data = sorted(counter.items(), key=lambda kv: kv[1], reverse=True)
-
-    for note, count in data:
-        logger.info(f"{note}: {count}")
+    midi = sorted(counter.items(), key=lambda kv: kv[1], reverse=True)
+    # change data from midi to note
+    if detail:
+        notes = [(librosa.midi_to_note(x[0], cents=True), x[1]) for x in midi]
+    else:
+        notes = [(librosa.midi_to_note(x[0]), x[1]) for x in midi]
+        for note, count in notes:
+            logger.info(f"{note}: {count}")
 
     if visualize is False:
         return
 
-    x_axis_order = librosa.midi_to_note(list(range(0, 300)))
-    data = sorted(counter.items(), key=lambda kv: x_axis_order.index(kv[0]))
-
-    plt.rcParams["figure.figsize"] = [10, 4]
-    plt.rcParams["figure.autolayout"] = True
-    plt.bar([x[0] for x in data], [x[1] for x in data])
-    plt.xticks(rotation=90)
-    plt.title("Notes distribution")
-    plt.xlabel("Notes")
-    plt.ylabel("Count")
-    plt.show()
+    # mark the correct order of notes
+    key_notes = librosa.midi_to_note(list(range(0, 300)), cents=True)
+    if not detail:
+        data = sorted(notes.items(), key=lambda kv: key_notes.index(kv[0]))
+        plt.rcParams["figure.figsize"] = [10, 4]
+        plt.rcParams["figure.autolayout"] = True
+        plt.bar([x[0] for x in notes], [x[1] for x in data])
+        plt.xticks(rotation=90)
+        plt.title("Notes distribution")
+        plt.xlabel("Notes")
+        plt.ylabel("Count")
+        plt.show()
+    else:
+        pass
+        
 
 
 if __name__ == "__main__":
