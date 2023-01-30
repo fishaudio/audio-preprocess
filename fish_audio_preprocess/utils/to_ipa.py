@@ -1,12 +1,13 @@
-from hashlib import new
-from g2pw import G2PWConverter
-from loguru import logger
-import yaml
-from tqdm import tqdm
 from concurrent.futures import ProcessPoolExecutor, as_completed
-import epitran
+from hashlib import new
 from pathlib import Path
 from unicodedata import normalize
+
+import epitran
+import yaml
+from g2pw import G2PWConverter
+from loguru import logger
+from tqdm import tqdm
 
 # change pinyin labels based on polyphonic.yaml
 polyponic_file = Path(__file__).parent / "polyphonic.yaml"

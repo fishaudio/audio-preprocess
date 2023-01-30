@@ -1,6 +1,6 @@
-from fish_audio_preprocess.utils.to_ipa import chinese2p
-
 import click
+
+from fish_audio_preprocess.utils.to_ipa import chinese2p
 
 
 @click.command()
