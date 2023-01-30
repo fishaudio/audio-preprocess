@@ -16,10 +16,8 @@ from fish_audio_preprocess.utils.file import list_files
 
 def count_notes_from_file(file: Union[Path, str]) -> Counter:
     """Count the notes from a file
-
     Args:
         file (Union[Path, str]): The file to count the notes from
-
     Returns:
         Counter: A counter of the notes
     """
