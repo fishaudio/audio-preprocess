@@ -70,10 +70,9 @@ def frequency(
         for file in tqdm(files, desc="Preparing"):
             tasks.append(executor.submit(count_notes_from_file, file))
 
-        for task in tqdm(
-            as_completed(tasks), desc="Collecting infos", total=len(tasks)
-        ):
-            counter += task.result()
+        for i in tqdm(as_completed(tasks), desc="Collecting infos", total=len(tasks)):
+            assert i.exception() is None, i.exception()
+            counter += i.result()
 
     data = sorted(counter.items(), key=lambda kv: kv[1], reverse=True)
 
@@ -93,6 +92,25 @@ def frequency(
     plt.title("Notes distribution")
     plt.xlabel("Notes")
     plt.ylabel("Count")
+
+    # Add grid to the plot
+    plt.grid(axis="y", alpha=0.75)
+    plt.grid(axis="x", alpha=0.75)
+
+    # Add percentage to the plot
+    total = sum([x[1] for x in data])
+    for i, v in enumerate([x[1] for x in data]):
+        if v / total < 0.001:
+            continue
+
+        plt.text(
+            i - 1,
+            v + 1,
+            f"{v / total * 100:.2f}%",
+            color="black",
+            fontweight="bold",
+        )
+
     plt.show()
 
 
