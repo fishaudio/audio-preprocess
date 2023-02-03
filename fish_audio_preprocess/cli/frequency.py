@@ -5,10 +5,8 @@ from pathlib import Path
 from typing import Union
 
 import click
-import librosa
 import numpy as np
 from loguru import logger
-from matplotlib import pyplot as plt
 from tqdm import tqdm
 
 from fish_audio_preprocess.utils.file import list_files
@@ -22,6 +20,7 @@ def count_notes_from_file(file: Union[Path, str]) -> Counter:
         Counter: A counter of the notes
     """
 
+    import librosa
     import parselmouth as pm
 
     pitch_ac = pm.Sound(str(file)).to_pitch_ac()
@@ -57,6 +56,9 @@ def frequency(
     """
     Get the frequency of all audio files in a directory
     """
+
+    import librosa
+    from matplotlib import pyplot as plt
 
     input_dir = Path(input_dir)
     files = list_files(input_dir, {".wav"}, recursive=recursive)

@@ -1,9 +1,7 @@
 from pathlib import Path
 
 import click
-import soundfile as sf
 from loguru import logger
-from matplotlib import pyplot as plt
 from tqdm import tqdm
 
 from fish_audio_preprocess.utils.file import AUDIO_EXTENSIONS, list_files
@@ -23,6 +21,9 @@ def length(
     """
     Get the length of all audio files in a directory
     """
+
+    import soundfile as sf
+    from matplotlib import pyplot as plt
 
     input_dir = Path(input_dir)
     files = list_files(input_dir, AUDIO_EXTENSIONS, recursive=recursive)

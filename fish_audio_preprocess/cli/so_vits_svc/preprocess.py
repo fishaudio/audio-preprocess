@@ -1,15 +1,9 @@
-"""
-本文件大量复制自 so_vits_svc, 如果有 shit code, 请原谅我
-"""
-
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import Lock, Value
 from pathlib import Path
 
 import click
-import librosa
 import numpy as np
-import torch
 from loguru import logger
 from tqdm import tqdm
 
@@ -29,6 +23,7 @@ def resize2d(x, target_len):
 
 
 def compute_f0(path, c_len):
+    import librosa
     from pyworld import pyworld
 
     x, sr = librosa.load(path, sr=32000)
@@ -52,6 +47,8 @@ HUBERT_MODEL = None
 def init_hubert(worker_id: Value, lock: Lock):
     global HUBERT_MODEL
 
+    import torch
+
     with lock:
         current_id = worker_id.value
         worker_id.value += 1
@@ -66,6 +63,9 @@ def init_hubert(worker_id: Value, lock: Lock):
 
 
 def process(filename: Path, overwrite: bool = False):
+    import librosa
+    import torch
+
     device = next(HUBERT_MODEL.parameters()).device
 
     # Process Hubert
