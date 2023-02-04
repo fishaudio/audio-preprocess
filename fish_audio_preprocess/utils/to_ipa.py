@@ -3,19 +3,16 @@ from hashlib import new
 from pathlib import Path
 from unicodedata import normalize
 
-import epitran
 import yaml
-from g2pw import G2PWConverter
 from loguru import logger
 from tqdm import tqdm
 
 # change pinyin labels based on polyphonic.yaml
 polyponic_file = Path(__file__).parent / "polyphonic.yaml"
-polyponic = yaml.safe_load(polyponic_file.open("r", encoding="utf-8"))
 
-ch_ipa = epitran.Epitran("cmn-Latn")
-
-chn_conv = G2PWConverter(style="pinyin", enable_non_tradional_chinese=True)
+polyponic = None
+ch_ipa = None
+chn_conv = None
 
 digit_dict = {
     "1": "一",
@@ -39,6 +36,13 @@ def digit_to_chinese(label):
 
 
 def label_list_to_str(label_list, phonetic=True):
+    global ch_ipa
+
+    if ch_ipa is None:
+        import epitran
+
+        ch_ipa = epitran.Epitran("cmn-Latn")
+
     labels = ""
     tones_to_ipa = {"0": "˥", "1": "˦", "2": "˧", "3": "˨", "4": "˩", "5": "˥"}
     for label in label_list:
@@ -58,6 +62,11 @@ def label_list_to_str(label_list, phonetic=True):
 
 
 def modify_polyphonic(text, pinyin_label):
+    global polyponic
+    if polyponic is None:
+        with open(polyponic_file, "r", encoding="utf-8") as f:
+            polyponic = yaml.safe_load(f)
+
     for key, value in polyponic.items():
         key_len = len(key)
         for i in range(len(text) - key_len + 1):
@@ -71,6 +80,12 @@ def modify_polyphonic(text, pinyin_label):
 
 
 def g2p(file_loc, label):
+    global chn_conv
+    if chn_conv is None:
+        import g2pw
+
+        chn_conv = g2pw.G2PWConverter(style="pinyin", enable_non_tradional_chinese=True)
+
     label = digit_to_chinese(label)
     pinyin_label = chn_conv(label)[0]
     pinyin_label = modify_polyphonic(label, pinyin_label)
