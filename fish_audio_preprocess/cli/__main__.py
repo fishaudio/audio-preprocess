@@ -11,14 +11,14 @@ from .slice_audio import slice_audio
 from .so_vits_svc import so_vits_svc
 from .to_ipa import to_ipa
 
-richuru.install()
-
 
 @click.group()
 @click.option("--debug/--no-debug", default=False)
 def cli(debug: bool):
     """An audio preprocessing CLI."""
+
     if debug:
+        richuru.install()
         logger.info("Debug mode is on")
 
 

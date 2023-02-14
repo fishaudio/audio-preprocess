@@ -87,6 +87,9 @@ def slice_audio(
 
         arr.append(np.zeros(silent_shape, dtype=audio.dtype))
 
+    _gen = np.concatenate(arr)
+    yield from slice_by_max_duration(_gen, max_duration, rate)
+
 
 def slice_audio_file(
     input_file: Union[str, Path],
