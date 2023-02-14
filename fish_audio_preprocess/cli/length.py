@@ -10,7 +10,9 @@ from fish_audio_preprocess.utils.file import AUDIO_EXTENSIONS, list_files
 @click.command()
 @click.argument("input_dir", type=click.Path(exists=True, file_okay=False))
 @click.option("--recursive/--no-recursive", default=True, help="Search recursively")
-@click.option("--visualize/--no-visualize", default=False, help="Visualize the distribution")
+@click.option(
+    "--visualize/--no-visualize", default=False, help="Visualize the distribution"
+)
 @click.option("-l", "--long-threshold", default=20, help="Threshold for long files")
 @click.option("-s", "--short-threshold", default=2, help="Threshold for short files")
 def length(
@@ -57,12 +59,16 @@ def length(
     # sort by duration
     if long_files:
         long_files = sorted(long_files, key=lambda x: x[2], reverse=True)
-        logger.warning(f"Found {len(long_files)} files longer than {long_threshold} seconds")
+        logger.warning(
+            f"Found {len(long_files)} files longer than {long_threshold} seconds"
+        )
         for i in [f"{i[3]}: {i[2]:.2f}" for i in long_files]:
             logger.warning(f"    {i}")
     if short_files:
         short_files = sorted(short_files, key=lambda x: x[2], reverse=False)
-        logger.warning(f"Found {len(short_files)} files shorter than {short_threshold} seconds")
+        logger.warning(
+            f"Found {len(short_files)} files shorter than {short_threshold} seconds"
+        )
         for i in [f"{i[3]}: {i[2]:.2f}" for i in short_files]:
             logger.warning(f"    {i}")
 

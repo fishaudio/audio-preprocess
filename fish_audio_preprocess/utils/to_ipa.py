@@ -123,9 +123,10 @@ def chinese2p(input_file, pinyin_labels_file, phoneme_labels_file, num_workers=8
                     continue
         logger.info(f"Done submitting tasks, total: {len(tasks)}")
 
-        with (open(pinyin_labels_file, "w", encoding="utf-8") as f_pinyin, open(
-                            phoneme_labels_file, "w", encoding="utf-8"
-                        ) as f_phoneme):
+        with (
+            open(pinyin_labels_file, "w", encoding="utf-8") as f_pinyin,
+            open(phoneme_labels_file, "w", encoding="utf-8") as f_phoneme,
+        ):
             for task in tqdm(
                 as_completed(tasks), total=len(tasks), desc="Converting to pinyin"
             ):

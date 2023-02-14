@@ -1,6 +1,5 @@
 import click
 import richuru
-
 from loguru import logger
 
 from .convert_to_wav import to_wav
@@ -11,7 +10,6 @@ from .separate_audio import separate
 from .slice_audio import slice_audio
 from .so_vits_svc import so_vits_svc
 from .to_ipa import to_ipa
-
 
 richuru.install()
 

@@ -90,7 +90,9 @@ def process(filename: Path, overwrite: bool = False):
 @click.command()
 @click.argument("input_dir", type=click.Path(exists=True, file_okay=False))
 @click.option("--recursive/--no-recursive", default=True, help="Search recursively")
-@click.option("--overwrite/--no-overwrite", default=False, help="Overwrite existing files")
+@click.option(
+    "--overwrite/--no-overwrite", default=False, help="Overwrite existing files"
+)
 @click.option(
     "--num-workers",
     help="Number of workers to use for processing, defaults to number of CPU cores",
