@@ -16,7 +16,7 @@ from .to_ipa import to_ipa
 def cli(debug: bool):
     """An audio preprocessing CLI."""
     if debug:
-        logger.info(f"Debug mode is on")
+        logger.info("Debug mode is on")
 
 
 # Register subcommands

@@ -102,7 +102,7 @@ def slice_audio(
             relative_path = file.relative_to(input_dir)
             save_path = output_dir / relative_path.parent / relative_path.stem
 
-            if save_path.exists() and overwrite is False:
+            if save_path.exists() and not overwrite:
                 skipped += 1
                 continue
 

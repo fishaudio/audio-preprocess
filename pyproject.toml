@@ -20,6 +20,7 @@ matplotlib = "^3.6.2"
 llvmlite = "^0.39.1"
 numba = "^0.56.4"
 librosa = "^0.9.0"
+richuru = "^0.1.1"
 praat-parselmouth = "^0.4.3"
 pyworld = { version = "^0.3.2", optional = true }
 g2pw = { version = "^0.1.1", optional = true }

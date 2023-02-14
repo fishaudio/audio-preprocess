@@ -18,8 +18,7 @@ def resize2d(x, target_len):
         np.arange(0, len(source)),
         source,
     )
-    res = np.nan_to_num(target)
-    return res
+    return np.nan_to_num(target)
 
 
 def compute_f0(path, c_len):
@@ -69,7 +68,7 @@ def process(filename: Path, overwrite: bool = False):
     device = next(HUBERT_MODEL.parameters()).device
 
     # Process Hubert
-    hubert_path = filename.parent / (filename.name + ".soft.pt")
+    hubert_path = filename.parent / f"{filename.name}.soft.pt"
     if hubert_path.exists() is False or overwrite:
         wav, _ = librosa.load(filename, sr=16000)
         wav = torch.from_numpy(wav)[None, None].to(device)
@@ -82,7 +81,7 @@ def process(filename: Path, overwrite: bool = False):
         c = torch.load(hubert_path)
 
     # Process F0
-    f0_path = filename.parent / (filename.name + ".f0.npy")
+    f0_path = filename.parent / f"{filename.name}.f0.npy"
     if f0_path.exists() is False or overwrite:
         f0 = compute_f0(filename, c.shape[-1] * 2)
         np.save(f0_path, f0)
@@ -91,9 +90,7 @@ def process(filename: Path, overwrite: bool = False):
 @click.command()
 @click.argument("input_dir", type=click.Path(exists=True, file_okay=False))
 @click.option("--recursive/--no-recursive", default=True, help="Search recursively")
-@click.option(
-    "--overwrite/--no-overwrite", default=False, help="Overwrite existing files"
-)
+@click.option("--overwrite/--no-overwrite", default=False, help="Overwrite existing files")
 @click.option(
     "--num-workers",
     help="Number of workers to use for processing, defaults to number of CPU cores",
@@ -120,17 +117,14 @@ def preprocess(
     with ProcessPoolExecutor(
         max_workers=num_workers, initializer=init_hubert, initargs=(worker_id, lock)
     ) as executor:
-        tasks = []
-
-        for file in tqdm(files, desc="Preparing tasks"):
-            tasks.append(
-                executor.submit(
-                    process,
-                    filename=file,
-                    overwrite=overwrite,
-                )
+        tasks = [
+            executor.submit(
+                process,
+                filename=file,
+                overwrite=overwrite,
             )
-
+            for file in tqdm(files, desc="Preparing tasks")
+        ]
         for i in tqdm(as_completed(tasks), total=len(tasks), desc="Processing"):
             assert i.exception() is None, i.exception()
 

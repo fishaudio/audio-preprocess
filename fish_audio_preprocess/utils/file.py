@@ -51,11 +51,7 @@ def list_files(
     if isinstance(path, str):
         path = Path(path)
 
-    if recursive:
-        files = path.glob("**/*")
-    else:
-        files = path.glob("*")
-
+    files = path.glob("**/*") if recursive else path.glob("*")
     files = [f for f in files if f.is_file()]
 
     if extensions is not None:
