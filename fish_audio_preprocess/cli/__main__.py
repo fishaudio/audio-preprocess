@@ -1,4 +1,6 @@
 import click
+import richuru
+
 from loguru import logger
 
 from .convert_to_wav import to_wav
@@ -11,12 +13,15 @@ from .so_vits_svc import so_vits_svc
 from .to_ipa import to_ipa
 
 
+richuru.install()
+
+
 @click.group()
 @click.option("--debug/--no-debug", default=False)
 def cli(debug: bool):
     """An audio preprocessing CLI."""
     if debug:
-        logger.info(f"Debug mode is on")
+        logger.info("Debug mode is on")
 
 
 # Register subcommands

@@ -81,7 +81,7 @@ def loudness_norm(
             if new_file.parent.exists() is False:
                 new_file.parent.mkdir(parents=True)
 
-            if new_file.exists() and overwrite is False:
+            if new_file.exists() and not overwrite:
                 skipped += 1
                 continue
 

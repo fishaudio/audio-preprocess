@@ -154,7 +154,7 @@ def merge_tracks(
 
     merged = torch.zeros_like(next(iter(tracks.values())))
 
-    for key in tracks.keys():
+    for key in tracks:
         if key in filter:
             merged += tracks[key]
 

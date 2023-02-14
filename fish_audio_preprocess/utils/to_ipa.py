@@ -29,10 +29,7 @@ digit_dict = {
 
 
 def digit_to_chinese(label):
-    non_digit_label = ""
-    for i in range(len(label)):
-        non_digit_label += digit_dict.get(label[i], label[i])
-    return non_digit_label
+    return "".join(digit_dict.get(label[i], label[i]) for i in range(len(label)))
 
 
 def label_list_to_str(label_list, phonetic=True):
@@ -50,12 +47,10 @@ def label_list_to_str(label_list, phonetic=True):
             print(label)
             l = ch_ipa.transliterate(label)
             l = normalize("NFC", l)
-            new_l = ""
-            for i in l:
-                new_l += tones_to_ipa.get(i, i)
-            labels += new_l + " "
-        elif label != None and not phonetic:
-            labels += label + " "
+            new_l = "".join(tones_to_ipa.get(i, i) for i in l)
+            labels += f"{new_l} "
+        elif label != None:
+            labels += f"{label} "
         else:
             labels += ""
     return labels
@@ -73,9 +68,8 @@ def modify_polyphonic(text, pinyin_label):
             if text[i : i + key_len] == key:
                 pinyin_label[i : i + key_len] = value
     # special case of 和 = han4 -> he2
-    if "和" in text:
-        if pinyin_label[text.index("和")] == "han4":
-            pinyin_label[text.index("和")] = "he2"
+    if "和" in text and pinyin_label[text.index("和")] == "han4":
+        pinyin_label[text.index("和")] = "he2"
     return pinyin_label
 
 
@@ -108,7 +102,7 @@ def g2p(file_loc, label):
     try:
         pinyin = label_list_to_str(new_pinyin_label, phonetic=False)
         phoneme = label_list_to_str(new_pinyin_label, phonetic=True)
-    except:
+    except Exception:
         logger.error(
             f"Error in {file_loc} with label {label} and new pinyin_label {new_pinyin_label}"
         )
@@ -124,14 +118,14 @@ def chinese2p(input_file, pinyin_labels_file, phoneme_labels_file, num_workers=8
                 try:
                     file_loc, label = line.split("|")
                     tasks.append(executor.submit(g2p, file_loc, label))
-                except:
+                except Exception:
                     logger.error(f"Error in {line}")
                     continue
         logger.info(f"Done submitting tasks, total: {len(tasks)}")
 
-        with open(pinyin_labels_file, "w", encoding="utf-8") as f_pinyin, open(
-            phoneme_labels_file, "w", encoding="utf-8"
-        ) as f_phoneme:
+        with (open(pinyin_labels_file, "w", encoding="utf-8") as f_pinyin, open(
+                            phoneme_labels_file, "w", encoding="utf-8"
+                        ) as f_phoneme):
             for task in tqdm(
                 as_completed(tasks), total=len(tasks), desc="Converting to pinyin"
             ):
@@ -139,13 +133,13 @@ def chinese2p(input_file, pinyin_labels_file, phoneme_labels_file, num_workers=8
                 if (
                     pinyin_label == ""
                     or phoneme == ""
-                    or pinyin_label == None
-                    or phoneme == None
+                    or pinyin_label is None
+                    or phoneme is None
                     or pinyin_label == " "
                     or phoneme == " "
                 ):
                     continue
-                f_pinyin.write(file_loc + "|" + pinyin_label + "\n")
-                f_phoneme.write(file_loc + "|" + phoneme + "\n")
+                f_pinyin.write(f"{file_loc}|{pinyin_label}" + "\n")
+                f_phoneme.write(f"{file_loc}|{phoneme}" + "\n")
 
     logger.info("Done")
