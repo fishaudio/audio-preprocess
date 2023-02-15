@@ -23,7 +23,11 @@ def count_notes_from_file(file: Union[Path, str]) -> Counter:
     import librosa
     import parselmouth as pm
 
-    pitch_ac = pm.Sound(str(file)).to_pitch_ac()
+    pitch_ac = pm.Sound(str(file)).to_pitch_ac(
+        voicing_threshold=0.6,
+        pitch_floor=40.0,
+        pitch_ceiling=1600.0,
+    )
     f0 = pitch_ac.selected_array["frequency"]
 
     counter = Counter()
