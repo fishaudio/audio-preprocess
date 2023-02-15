@@ -26,7 +26,7 @@ def count_notes_from_file(file: Union[Path, str]) -> Counter:
     pitch_ac = pm.Sound(str(file)).to_pitch_ac(
         voicing_threshold=0.6,
         pitch_floor=40.0,
-        pitch_ceiling=1600.0,
+        pitch_ceiling=2000.0,
     )
     f0 = pitch_ac.selected_array["frequency"]
 
