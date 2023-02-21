@@ -119,7 +119,7 @@ def slice_audio_file(
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    audio, rate = sf.read(str(input_file))
+    audio, rate = librosa.load(str(input_file), sr=None, mono=True)
     for idx, sliced in enumerate(
         slice_audio(
             audio,
