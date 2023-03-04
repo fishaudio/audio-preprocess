@@ -5,10 +5,8 @@ from pathlib import Path
 from typing import Union
 
 import click
-import librosa
 import numpy as np
 from loguru import logger
-from matplotlib import pyplot as plt
 from tqdm import tqdm
 
 from fish_audio_preprocess.utils.file import list_files
@@ -22,9 +20,14 @@ def count_notes_from_file(file: Union[Path, str]) -> Counter:
         Counter: A counter of the notes
     """
 
+    import librosa
     import parselmouth as pm
 
-    pitch_ac = pm.Sound(str(file)).to_pitch_ac()
+    pitch_ac = pm.Sound(str(file)).to_pitch_ac(
+        voicing_threshold=0.6,
+        pitch_floor=40.0,
+        pitch_ceiling=1600.0,
+    )
     f0 = pitch_ac.selected_array["frequency"]
 
     counter = Counter()
@@ -58,6 +61,9 @@ def frequency(
     Get the frequency of all audio files in a directory
     """
 
+    import librosa
+    from matplotlib import pyplot as plt
+
     input_dir = Path(input_dir)
     files = list_files(input_dir, {".wav"}, recursive=recursive)
     logger.info(f"Found {len(files)} files, calculating frequency")
@@ -65,11 +71,10 @@ def frequency(
     counter = Counter()
 
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
-        tasks = []
-
-        for file in tqdm(files, desc="Preparing"):
-            tasks.append(executor.submit(count_notes_from_file, file))
-
+        tasks = [
+            executor.submit(count_notes_from_file, file)
+            for file in tqdm(files, desc="Preparing")
+        ]
         for i in tqdm(as_completed(tasks), desc="Collecting infos", total=len(tasks)):
             assert i.exception() is None, i.exception()
             counter += i.result()
@@ -79,10 +84,10 @@ def frequency(
     for note, count in data:
         logger.info(f"{note}: {count}")
 
-    if visualize is False:
+    if not visualize:
         return
 
-    x_axis_order = librosa.midi_to_note(list(range(0, 300)))
+    x_axis_order = librosa.midi_to_note(list(range(300)))
     data = sorted(counter.items(), key=lambda kv: x_axis_order.index(kv[0]))
 
     plt.rcParams["figure.figsize"] = [10, 4]
@@ -98,8 +103,8 @@ def frequency(
     plt.grid(axis="x", alpha=0.75)
 
     # Add percentage to the plot
-    total = sum([x[1] for x in data])
-    for i, v in enumerate([x[1] for x in data]):
+    total = sum(x[1] for x in data)
+    for i, v in enumerate(x[1] for x in data):
         if v / total < 0.001:
             continue
 

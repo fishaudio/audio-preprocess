@@ -87,6 +87,10 @@ def slice_audio(
 
         arr.append(np.zeros(silent_shape, dtype=audio.dtype))
 
+    if duration > 0:
+        _gen = np.concatenate(arr)
+        yield from slice_by_max_duration(_gen, max_duration, rate)
+
 
 def slice_audio_file(
     input_file: Union[str, Path],
@@ -115,7 +119,7 @@ def slice_audio_file(
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    audio, rate = sf.read(str(input_file))
+    audio, rate = librosa.load(str(input_file), sr=None, mono=True)
     for idx, sliced in enumerate(
         slice_audio(
             audio,

@@ -30,10 +30,7 @@ def loudness_norm(
     meter = pyln.Meter(rate, block_size=block_size)  # create BS.1770 meter
     _loudness = meter.integrated_loudness(audio)
 
-    # loudness normalize audio to [loudness] dB LUFS
-    loudness_normalized_audio = pyln.normalize.loudness(audio, _loudness, loudness)
-
-    return loudness_normalized_audio
+    return pyln.normalize.loudness(audio, _loudness, loudness)
 
 
 def loudness_norm_file(

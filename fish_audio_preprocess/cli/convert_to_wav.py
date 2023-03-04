@@ -65,7 +65,7 @@ def to_wav(
         check_path = (
             (new_file.parent / (new_file.name % 0)) if segment > 0 else new_file
         )
-        if check_path.exists() and overwrite is False:
+        if check_path.exists() and not overwrite:
             skipped += 1
             continue
 
@@ -82,7 +82,7 @@ def to_wav(
             stderr=sp.DEVNULL,
         )
 
-    logger.info(f"Done!")
+    logger.info("Done!")
     logger.info(f"Total: {len(files)}, Skipped: {skipped}")
     logger.info(f"Output directory: {output_dir}")
 

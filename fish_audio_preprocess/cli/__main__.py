@@ -1,4 +1,5 @@
 import click
+import richuru
 from loguru import logger
 
 from .convert_to_wav import to_wav
@@ -15,8 +16,10 @@ from .to_ipa import to_ipa
 @click.option("--debug/--no-debug", default=False)
 def cli(debug: bool):
     """An audio preprocessing CLI."""
+
     if debug:
-        logger.info(f"Debug mode is on")
+        richuru.install()
+        logger.info("Debug mode is on")
 
 
 # Register subcommands

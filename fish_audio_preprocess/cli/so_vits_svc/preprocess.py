@@ -1,15 +1,9 @@
-"""
-本文件大量复制自 so_vits_svc, 如果有 shit code, 请原谅我
-"""
-
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import Lock, Value
 from pathlib import Path
 
 import click
-import librosa
 import numpy as np
-import torch
 from loguru import logger
 from tqdm import tqdm
 
@@ -24,11 +18,11 @@ def resize2d(x, target_len):
         np.arange(0, len(source)),
         source,
     )
-    res = np.nan_to_num(target)
-    return res
+    return np.nan_to_num(target)
 
 
 def compute_f0(path, c_len):
+    import librosa
     from pyworld import pyworld
 
     x, sr = librosa.load(path, sr=32000)
@@ -52,6 +46,8 @@ HUBERT_MODEL = None
 def init_hubert(worker_id: Value, lock: Lock):
     global HUBERT_MODEL
 
+    import torch
+
     with lock:
         current_id = worker_id.value
         worker_id.value += 1
@@ -66,10 +62,13 @@ def init_hubert(worker_id: Value, lock: Lock):
 
 
 def process(filename: Path, overwrite: bool = False):
+    import librosa
+    import torch
+
     device = next(HUBERT_MODEL.parameters()).device
 
     # Process Hubert
-    hubert_path = filename.parent / (filename.name + ".soft.pt")
+    hubert_path = filename.parent / f"{filename.name}.soft.pt"
     if hubert_path.exists() is False or overwrite:
         wav, _ = librosa.load(filename, sr=16000)
         wav = torch.from_numpy(wav)[None, None].to(device)
@@ -82,7 +81,7 @@ def process(filename: Path, overwrite: bool = False):
         c = torch.load(hubert_path)
 
     # Process F0
-    f0_path = filename.parent / (filename.name + ".f0.npy")
+    f0_path = filename.parent / f"{filename.name}.f0.npy"
     if f0_path.exists() is False or overwrite:
         f0 = compute_f0(filename, c.shape[-1] * 2)
         np.save(f0_path, f0)
@@ -120,17 +119,14 @@ def preprocess(
     with ProcessPoolExecutor(
         max_workers=num_workers, initializer=init_hubert, initargs=(worker_id, lock)
     ) as executor:
-        tasks = []
-
-        for file in tqdm(files, desc="Preparing tasks"):
-            tasks.append(
-                executor.submit(
-                    process,
-                    filename=file,
-                    overwrite=overwrite,
-                )
+        tasks = [
+            executor.submit(
+                process,
+                filename=file,
+                overwrite=overwrite,
             )
-
+            for file in tqdm(files, desc="Preparing tasks")
+        ]
         for i in tqdm(as_completed(tasks), total=len(tasks), desc="Processing"):
             assert i.exception() is None, i.exception()
 
