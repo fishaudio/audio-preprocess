@@ -40,6 +40,11 @@ def to_wav(
     """Converts all audio and video files in input_dir to wav files in output_dir."""
 
     input_dir, output_dir = Path(input_dir), Path(output_dir)
+
+    if input_dir == output_dir and clean:
+        logger.error("You are trying to clean the input directory, aborting")
+        return
+
     make_dirs(output_dir, clean)
 
     files = list_files(

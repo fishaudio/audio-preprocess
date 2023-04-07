@@ -87,6 +87,11 @@ def slice_audio(
     from fish_audio_preprocess.utils.slice_audio import slice_audio_file
 
     input_dir, output_dir = Path(input_dir), Path(output_dir)
+
+    if input_dir == output_dir and clean:
+        logger.error("You are trying to clean the input directory, aborting")
+        return
+
     make_dirs(output_dir, clean)
 
     files = list_files(input_dir, extensions=AUDIO_EXTENSIONS, recursive=recursive)
