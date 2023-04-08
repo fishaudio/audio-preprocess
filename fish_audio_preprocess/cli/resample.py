@@ -18,12 +18,12 @@ def resample_file(
     if overwrite is False and output_file.exists():
         return
 
-    audio, _ = librosa.load(input_file, sr=samping_rate, mono=mono)
+    audio, _ = librosa.load(str(input_file), sr=samping_rate, mono=mono)
 
     if audio.ndim == 2:
         audio = audio.T
 
-    sf.write(output_file, audio, samping_rate)
+    sf.write(str(output_file), audio, samping_rate)
 
 
 @click.command()
