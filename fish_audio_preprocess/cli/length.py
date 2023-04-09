@@ -56,7 +56,7 @@ def length(
 
     # Too Long
     if long_threshold is not None:
-        long_files = [i for i in infos if i[2] > long_threshold]
+        long_files = [i for i in infos if i[2] > float(long_threshold)]
 
         # sort by duration
         if long_files:
@@ -69,7 +69,7 @@ def length(
 
     # Too Short
     if short_threshold is not None:
-        short_files = [i for i in infos if i[2] < short_threshold]
+        short_files = [i for i in infos if i[2] < float(short_threshold)]
 
         if short_files:
             short_files = sorted(short_files, key=lambda x: x[2], reverse=False)
