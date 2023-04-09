@@ -11,17 +11,19 @@ from fish_audio_preprocess.utils.file import AUDIO_EXTENSIONS, list_files
 @click.command()
 @click.argument("input_dir", type=click.Path(exists=True, file_okay=False))
 @click.option("--recursive/--no-recursive", default=True, help="Search recursively")
+@click.option("--visualize/--no-visualize", default=False, help="Visualize the distribution")
 @click.option(
-    "--visualize/--no-visualize", default=False, help="Visualize the distribution"
+    "-l", "--long-threshold", default=None, type=float, help="Threshold for long files"
 )
-@click.option("-l", "--long-threshold", default=None, help="Threshold for long files")
-@click.option("-s", "--short-threshold", default=None, help="Threshold for short files")
+@click.option(
+    "-s", "--short-threshold", default=None, type=float, help="Threshold for short files"
+)
 def length(
     input_dir: str,
     recursive: bool,
     visualize: bool,
-    long_threshold: Optional[int],
-    short_threshold: Optional[int],
+    long_threshold: Optional[float],
+    short_threshold: Optional[float],
 ):
     """
     Get the length of all audio files in a directory
