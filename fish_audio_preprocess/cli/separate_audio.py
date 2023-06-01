@@ -104,6 +104,11 @@ def separate(
     """
 
     input_dir, output_dir = Path(input_dir), Path(output_dir)
+
+    if input_dir == output_dir and clean:
+        logger.error("You are trying to clean the input directory, aborting")
+        return
+
     make_dirs(output_dir, clean)
 
     base_args = (

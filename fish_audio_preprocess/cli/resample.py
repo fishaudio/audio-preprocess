@@ -9,6 +9,23 @@ from tqdm import tqdm
 from fish_audio_preprocess.utils.file import AUDIO_EXTENSIONS, list_files, make_dirs
 
 
+def resample_file(
+    input_file: Path, output_file: Path, overwrite: bool, samping_rate: int, mono: bool
+):
+    import librosa
+    import soundfile as sf
+
+    if overwrite is False and output_file.exists():
+        return
+
+    audio, _ = librosa.load(str(input_file), sr=samping_rate, mono=mono)
+
+    if audio.ndim == 2:
+        audio = audio.T
+
+    sf.write(str(output_file), audio, samping_rate)
+
+
 @click.command()
 @click.argument("input_dir", type=click.Path(exists=True, file_okay=False))
 @click.argument("output_dir", type=click.Path(exists=False, file_okay=False))
@@ -20,47 +37,38 @@ from fish_audio_preprocess.utils.file import AUDIO_EXTENSIONS, list_files, make_
     "--clean/--no-clean", default=False, help="Clean output directory before processing"
 )
 @click.option(
-    "--peak",
-    help="Peak normalize audio to -1 dB",
-    default=-1.0,
-    show_default=True,
-    type=float,
-)
-@click.option(
-    "--loudness",
-    help="Loudness normalize audio to -23 dB LUFS",
-    default=-23.0,
-    show_default=True,
-    type=float,
-)
-@click.option(
-    "--block-size",
-    help="Block size for loudness measurement, unit is second",
-    default=0.400,
-    show_default=True,
-    type=float,
-)
-@click.option(
     "--num-workers",
     help="Number of workers to use for processing, defaults to number of CPU cores",
     default=os.cpu_count(),
     show_default=True,
     type=int,
 )
-def loudness_norm(
+@click.option(
+    "--sampling-rate",
+    "-sr",
+    help="Sampling rate to resample to",
+    default=44100,
+    show_default=True,
+    type=int,
+)
+@click.option(
+    "--mono/--no-mono",
+    default=True,
+    help="Resample to mono (1 channel)",
+)
+def resample(
     input_dir: str,
     output_dir: str,
     recursive: bool,
     overwrite: bool,
     clean: bool,
-    peak: float,
-    loudness: float,
-    block_size: float,
     num_workers: int,
+    sampling_rate: int,
+    mono: bool,
 ):
-    """Perform loudness normalization (ITU-R BS.1770-4) on audio files."""
-
-    from fish_audio_preprocess.utils.loudness_norm import loudness_norm_file
+    """
+    Resample all audio files in input_dir to output_dir.
+    """
 
     input_dir, output_dir = Path(input_dir), Path(output_dir)
 
@@ -71,7 +79,7 @@ def loudness_norm(
     make_dirs(output_dir, clean)
 
     files = list_files(input_dir, extensions=AUDIO_EXTENSIONS, recursive=recursive)
-    logger.info(f"Found {len(files)} files, normalizing loudness")
+    logger.info(f"Found {len(files)} files, resampling to {sampling_rate} Hz")
 
     skipped = 0
 
@@ -92,7 +100,7 @@ def loudness_norm(
 
             tasks.append(
                 executor.submit(
-                    loudness_norm_file, file, new_file, peak, loudness, block_size
+                    resample_file, file, new_file, overwrite, sampling_rate, mono
                 )
             )
 
@@ -105,4 +113,4 @@ def loudness_norm(
 
 
 if __name__ == "__main__":
-    loudness_norm()
+    resample()

@@ -11,17 +11,19 @@ from fish_audio_preprocess.utils.file import AUDIO_EXTENSIONS, list_files
 @click.command()
 @click.argument("input_dir", type=click.Path(exists=True, file_okay=False))
 @click.option("--recursive/--no-recursive", default=True, help="Search recursively")
+@click.option("--visualize/--no-visualize", default=False, help="Visualize the distribution")
 @click.option(
-    "--visualize/--no-visualize", default=False, help="Visualize the distribution"
+    "-l", "--long-threshold", default=None, type=float, help="Threshold for long files"
 )
-@click.option("-l", "--long-threshold", default=None, help="Threshold for long files")
-@click.option("-s", "--short-threshold", default=None, help="Threshold for short files")
+@click.option(
+    "-s", "--short-threshold", default=None, type=float, help="Threshold for short files"
+)
 def length(
     input_dir: str,
     recursive: bool,
     visualize: bool,
-    long_threshold: Optional[int],
-    short_threshold: Optional[int],
+    long_threshold: Optional[float],
+    short_threshold: Optional[float],
 ):
     """
     Get the length of all audio files in a directory
@@ -56,7 +58,7 @@ def length(
 
     # Too Long
     if long_threshold is not None:
-        long_files = [i for i in infos if i[2] > long_threshold]
+        long_files = [i for i in infos if i[2] > float(long_threshold)]
 
         # sort by duration
         if long_files:
@@ -69,7 +71,7 @@ def length(
 
     # Too Short
     if short_threshold is not None:
-        short_files = [i for i in infos if i[2] < short_threshold]
+        short_files = [i for i in infos if i[2] < float(short_threshold)]
 
         if short_files:
             short_files = sorted(short_files, key=lambda x: x[2], reverse=False)

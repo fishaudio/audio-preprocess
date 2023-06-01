@@ -67,7 +67,7 @@ def list_files(
     )
 
     if extensions is not None:
-        files = [f for f in files if f.suffix in extensions and f.is_file()]
+        files = [f for f in files if f.suffix in extensions]
 
     if sort:
         files = sorted(files)
