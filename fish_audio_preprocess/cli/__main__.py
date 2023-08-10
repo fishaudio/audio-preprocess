@@ -10,7 +10,7 @@ from .resample import resample
 from .separate_audio import separate
 from .slice_audio import slice_audio, slice_audio_v2
 from .to_ipa import to_ipa
-
+from .enhance import enhance
 
 @click.group()
 @click.option("--debug/--no-debug", default=False)
@@ -32,6 +32,8 @@ cli.add_command(loudness_norm)
 cli.add_command(slice_audio)
 cli.add_command(slice_audio_v2)
 cli.add_command(resample)
+
+cli.add_command(enhance)
 
 cli.add_command(to_ipa)
 
