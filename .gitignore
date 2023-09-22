@@ -305,3 +305,5 @@ poetry.toml
 # Local data folder
 data
 test
+.pdm-python
+.pypirc
