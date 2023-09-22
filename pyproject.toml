@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fish-audio-preprocess"
-version = "0.2.2"
+version = "0.2.3"
 description = "Preprocess audio data"
 authors = ["Lengyue <lengyue@lengyue.me>"]
 license = "Apache"
@@ -26,8 +26,8 @@ epitran = { version = "^1.24", optional = true }
 transformers = { version = "^4.25.1", optional = true }
 
 [tool.poetry.dev-dependencies]
-isort = "^5.11.4"
-black = "^22.12.0"
+isort = "^5.12.0"
+black = "^23.7.0"
 datasets = "^2.8.0"
 evaluate = "^0.4.0"
 
