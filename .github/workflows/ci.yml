@@ -16,5 +16,11 @@ jobs:
       - uses: pdm-project/setup-pdm@v3
       - name: Install Dependencies
         run: pdm sync
-      - name: Build & publish
-        run: pdm publish -u __token__ -p ${{ secrets.PYPI_TOKEN }}
+      - name: Build
+        run: pdm build -d dist
+      - name: Publish release distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
+          user: __token__
+          password: ${{ secrets.PYPI_TOKEN }}
