@@ -1,45 +1,31 @@
-[tool.poetry]
-name = "fish-audio-preprocess"
-version = "0.2.3"
+[project]
+authors = [
+  {name = "Lengyue", email = "lengyue@lengyue.me"},
+]
+dependencies = [
+  "tqdm>=4.64.1",
+  "demucs>=4.0.0",
+  "loguru>=0.6.0",
+  "pyloudnorm>=0.1.1",
+  "matplotlib>=3.6.2",
+  "librosa>=0.9.0",
+  "richuru>=0.1.1",
+  "praat-parselmouth>=0.4.3",
+]
 description = "Preprocess audio data"
-authors = ["Lengyue <lengyue@lengyue.me>"]
-license = "Apache"
+license = {text = "Apache"}
+name = "fish-audio-preprocess"
+readme = "README.md"
+requires-python = ">=3.9,<4.0"
+version = "0.2.4"
 
-packages = [{ include = "fish_audio_preprocess" }]
-
-[tool.poetry.dependencies]
-python = "^3.9"
-black = "^22.12.0"
-tqdm = "^4.64.1"
-demucs = "^4.0.0"
-loguru = "^0.6.0"
-pyloudnorm = "^0.1.1"
-PySoundFile = "^0.9.0"
-matplotlib = "^3.6.2"
-llvmlite = "^0.39.1"
-numba = "^0.56.4"
-librosa = "^0.9.0"
-richuru = "^0.1.1"
-praat-parselmouth = "^0.4.3"
-g2pw = { version = "^0.1.1", optional = true }
-epitran = { version = "^1.24", optional = true }
-transformers = { version = "^4.25.1", optional = true }
-
-[tool.poetry.dev-dependencies]
-isort = "^5.12.0"
-black = "^23.7.0"
-datasets = "^2.8.0"
-evaluate = "^0.4.0"
-
-[tool.poetry.extras]
-ipa = ["g2pw", "epitran", "transformers"]
-
-[tool.poetry.scripts]
-fap = "fish_audio_preprocess.cli.__main__:cli"
+[tool.pdm]
+[tool.pdm.build]
+includes = ["fish_audio_preprocess"]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+build-backend = "pdm.backend"
+requires = ["pdm-backend"]
 
 [tool.isort]
 profile = "black"

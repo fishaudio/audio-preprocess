@@ -11,12 +11,18 @@ from fish_audio_preprocess.utils.file import AUDIO_EXTENSIONS, list_files
 @click.command()
 @click.argument("input_dir", type=click.Path(exists=True, file_okay=False))
 @click.option("--recursive/--no-recursive", default=True, help="Search recursively")
-@click.option("--visualize/--no-visualize", default=False, help="Visualize the distribution")
+@click.option(
+    "--visualize/--no-visualize", default=False, help="Visualize the distribution"
+)
 @click.option(
     "-l", "--long-threshold", default=None, type=float, help="Threshold for long files"
 )
 @click.option(
-    "-s", "--short-threshold", default=None, type=float, help="Threshold for short files"
+    "-s",
+    "--short-threshold",
+    default=None,
+    type=float,
+    help="Threshold for short files",
 )
 def length(
     input_dir: str,
