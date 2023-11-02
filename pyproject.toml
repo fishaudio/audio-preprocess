@@ -16,7 +16,7 @@ description = "Preprocess audio data"
 license = {text = "Apache"}
 name = "fish-audio-preprocess"
 readme = "README.md"
-requires-python = ">=3.9,<4.0"
+requires-python = ">=3.9,<3.13"
 version = "0.2.5"
 
 [project.scripts]
