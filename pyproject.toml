@@ -16,19 +16,19 @@ description = "Preprocess audio data"
 license = {text = "Apache"}
 name = "fish-audio-preprocess"
 readme = "README.md"
-requires-python = ">=3.9,<3.13"
+requires-python = ">=3.9"
 version = "0.2.5"
 
 [project.scripts]
 fap = "fish_audio_preprocess.cli.__main__:cli"
 
-[tool.pdm]
-[tool.pdm.build]
-includes = ["fish_audio_preprocess"]
 
 [build-system]
-build-backend = "pdm.backend"
-requires = ["pdm-backend"]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["fish_audio_preprocess"]
 
 [tool.isort]
 profile = "black"
