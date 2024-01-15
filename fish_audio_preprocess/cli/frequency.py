@@ -88,6 +88,7 @@ def frequency(
         return
 
     x_axis_order = librosa.midi_to_note(list(range(300)))
+    x_axis_order = list(x_axis_order)
     data = sorted(counter.items(), key=lambda kv: x_axis_order.index(kv[0]))
 
     plt.rcParams["figure.figsize"] = [10, 4]
