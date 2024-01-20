@@ -1,15 +1,18 @@
+from concurrent.futures import ProcessPoolExecutor
+from typing import Union
+
 import click
 import torch
-from fish_audio_preprocess.utils.file import AUDIO_EXTENSIONS, split_list, list_files
-from fish_audio_preprocess.utils.transcribe import batch_transcribe
-from typing import Union
 from loguru import logger
-
-from concurrent.futures import ProcessPoolExecutor
 from tqdm import tqdm
+
+from fish_audio_preprocess.utils.file import AUDIO_EXTENSIONS, list_files, split_list
+from fish_audio_preprocess.utils.transcribe import batch_transcribe
+
 
 def replace_lastest(string, old, new):
     return string[::-1].replace(old[::-1], new[::-1], 1)[::-1]
+
 
 @click.command()
 @click.argument("input_dir", type=click.Path(exists=True, file_okay=False))
@@ -51,7 +54,7 @@ def transcribe(input_dir, num_workers, lang, model_size):
     if len(audio_files) == 0:
         logger.error(f"No audio files found in {input_dir}.")
         return
-    
+
     # 按照 num workers 切块
     chunks = split_list(audio_files, num_workers)
 
@@ -64,7 +67,7 @@ def transcribe(input_dir, num_workers, lang, model_size):
                     files=chunk,
                     model_size=model_size,
                     lang=lang,
-                    pos=len(tasks)
+                    pos=len(tasks),
                 )
             )
         results = {}
@@ -72,10 +75,10 @@ def transcribe(input_dir, num_workers, lang, model_size):
             ret = task.result()
             for res in ret.keys():
                 results[res] = ret[res]
-        
+
         logger.info("Output to .lab file")
         for file in tqdm(results.keys()):
             path = replace_lastest(file, ".wav", ".lab")
             # logger.info(path)
-            with open(path, "w",encoding="utf-8") as f:
+            with open(path, "w", encoding="utf-8") as f:
                 f.write(results[file])
