@@ -143,11 +143,11 @@ def slice_audio(
 @click.option(
     "--overwrite/--no-overwrite", default=False, help="Overwrite existing files"
 )
+@click.option("--flat/--no-flat", default=False, help="Use flat directory structure")
 @click.option(
-    "--flat/--no-flat", default=False, help="Use flat directory structure"
-)
-@click.option(
-    "--merge-short/--no-merge-short", default=False, help="Merge short slices automatically"
+    "--merge-short/--no-merge-short",
+    default=False,
+    help="Merge short slices automatically",
 )
 @click.option(
     "--clean/--no-clean", default=False, help="Clean output directory before processing"
