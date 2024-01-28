@@ -11,14 +11,18 @@ from fish_audio_preprocess.utils.slice_audio import slice_by_max_duration
 
 def merge_short_chunks(chunks, min_length, max_duration, rate):
     merging_chunk = np.array([])
+    merged_chunks = []
+    # 将 chunks 安装长度排序, 但是好像没啥用，删了删了
+    # chunks = sorted(chunks, key=lambda x: len(x))
     for chunk in chunks:
-        if (len(merging_chunk) + len(chunk)) > max_duration * rate:
-            del merging_chunk
+        if (len(merging_chunk) + len(chunk)) > max_duration * rate and len(merging_chunk) > 0:
+            merged_chunks.append(merging_chunk)
             merging_chunk = np.array([]) 
         else:
             merging_chunk = np.concatenate((merging_chunk, chunk))
     if len(merging_chunk) > 0:
-        yield merging_chunk
+        merged_chunks.append(merging_chunk)
+    return merged_chunks
 
 class Slicer:
     def __init__(
@@ -211,7 +215,8 @@ def slice_audio_v2(
     """
 
     if len(audio) / rate < min_duration:
-        yield from slice_by_max_duration(audio, max_duration, rate)
+        sliced_by_max_duration_chunk = slice_by_max_duration(chunk, max_duration, rate)
+        yield from merge_short_chunks(sliced_by_max_duration_chunk, min_duration, max_duration, rate) if useMergeShort else sliced_by_max_duration_chunk
         return
 
     slicer = Slicer(
@@ -223,9 +228,13 @@ def slice_audio_v2(
         max_sil_kept=max_silence_kept * 1000,
     )
 
-    for chunk in slicer.slice(audio):
+    sliced_audio = slicer.slice(audio)
+    if useMergeShort:
+        sliced_audio = merge_short_chunks(sliced_audio, min_duration, max_duration, rate)
+    
+    for chunk in sliced_audio:
         sliced_by_max_duration_chunk = slice_by_max_duration(chunk, max_duration, rate)
-        yield from merge_short_chunks(sliced_by_max_duration_chunk, min_duration, max_duration, rate) if useMergeShort else sliced_by_max_duration_chunk
+        yield from sliced_by_max_duration_chunk
 
 
 def slice_audio_file_v2(

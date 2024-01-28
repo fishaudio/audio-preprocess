@@ -223,6 +223,11 @@ def slice_audio_v2(
 
     input_dir, output_dir = Path(input_dir), Path(output_dir)
 
+    if flat:
+        logger.info("Using flat directory structure")
+    if merge_short:
+        logger.info("Merging short slices automatically")
+
     if input_dir == output_dir and clean:
         logger.error("You are trying to clean the input directory, aborting")
         return
