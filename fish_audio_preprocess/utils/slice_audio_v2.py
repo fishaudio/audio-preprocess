@@ -21,17 +21,15 @@ def merge_short_chunks(chunks, min_length, max_length, rate):
     Returns:
         Iterable of merged chunks
     """
-    merged_chunk = []
+    merging_chunk = np.array([])
     for chunk in chunks:
-        if len(chunk) / rate < min_length:
-            merged_chunk.extend(chunk)
+        if (len(merging_chunk) + len(chunk)) > max_duration * rate:
+            del merging_chunk
+            merging_chunk = np.array([]) 
         else:
-            if len(merged_chunk) > 0:
-                yield np.array(merged_chunk)
-            merged_chunk = []
-            yield chunk
-    if len(merged_chunk) > 0:
-        yield np.array(merged_chunk)
+            merging_chunk = np.concatenate((merging_chunk, chunk))
+    if len(merging_chunk) > 0:
+        yield merging_chunk
 
 class Slicer:
     def __init__(
