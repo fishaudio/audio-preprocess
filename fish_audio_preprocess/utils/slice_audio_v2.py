@@ -9,18 +9,7 @@ import soundfile as sf
 
 from fish_audio_preprocess.utils.slice_audio import slice_by_max_duration
 
-def merge_short_chunks(chunks, min_length, max_length, rate):
-    """Merge chunks that are too short
-
-    Args:
-        chunks: chunks to be merged
-        min_length: minimum duration of each slice
-        max_length: maximum duration of each slice
-        rate: sample rate
-
-    Returns:
-        Iterable of merged chunks
-    """
+def merge_short_chunks(chunks, min_length, max_duration, rate):
     merging_chunk = np.array([])
     for chunk in chunks:
         if (len(merging_chunk) + len(chunk)) > max_duration * rate:
