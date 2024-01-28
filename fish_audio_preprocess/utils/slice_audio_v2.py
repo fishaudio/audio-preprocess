@@ -283,6 +283,6 @@ def slice_audio_file_v2(
         )
     ):
         if useFlat:
-            sf.write(str(output_dir) + f"_{idx:04d}.wav"), sliced, rate)
+            sf.write(str(output_dir) + f"_{idx:04d}.wav", sliced, rate)
         else:
             sf.write(str(output_dir / f"{idx:04d}.wav"), sliced, rate)
