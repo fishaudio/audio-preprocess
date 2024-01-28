@@ -144,6 +144,12 @@ def slice_audio(
     "--overwrite/--no-overwrite", default=False, help="Overwrite existing files"
 )
 @click.option(
+    "--flat/--no-flat", default=False, help="Use flat directory structure"
+)
+@click.option(
+    "--merge-short/--no-merge-short", default=False, help="Merge short slices automatically"
+)
+@click.option(
     "--clean/--no-clean", default=False, help="Clean output directory before processing"
 )
 @click.option(
@@ -200,6 +206,8 @@ def slice_audio_v2(
     output_dir: str,
     recursive: bool,
     overwrite: bool,
+    useFlat: bool,
+    useMergeShort: bool,
     clean: bool,
     num_workers: int,
     min_duration: float,
@@ -238,7 +246,7 @@ def slice_audio_v2(
                 skipped += 1
                 continue
 
-            if save_path.exists() is False:
+            if save_path.exists() is False and not useFlat:
                 save_path.mkdir(parents=True)
 
             tasks.append(
@@ -252,6 +260,8 @@ def slice_audio_v2(
                     top_db=top_db,
                     hop_length=hop_length,
                     max_silence_kept=max_silence_kept,
+                    useFlat=useFlat,
+                    useMergeShort=useMergeShort,
                 )
             )
 

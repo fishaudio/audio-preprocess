@@ -9,6 +9,29 @@ import soundfile as sf
 
 from fish_audio_preprocess.utils.slice_audio import slice_by_max_duration
 
+def merge_short_chunks(chunks, min_length, max_length, rate):
+    """Merge chunks that are too short
+
+    Args:
+        chunks: chunks to be merged
+        min_length: minimum duration of each slice
+        max_length: maximum duration of each slice
+        rate: sample rate
+
+    Returns:
+        Iterable of merged chunks
+    """
+    merged_chunk = []
+    for chunk in chunks:
+        if len(chunk) / rate < min_length:
+            merged_chunk.extend(chunk)
+        else:
+            if len(merged_chunk) > 0:
+                yield np.array(merged_chunk)
+            merged_chunk = []
+            yield chunk
+    if len(merged_chunk) > 0:
+        yield np.array(merged_chunk)
 
 class Slicer:
     def __init__(
@@ -182,6 +205,7 @@ def slice_audio_v2(
     top_db: int = -40,
     hop_length: int = 10,
     max_silence_kept: float = 0.5,
+    useMergeShort: bool = False,
 ) -> Iterable[np.ndarray]:
     """Slice audio by silence
 
@@ -213,7 +237,8 @@ def slice_audio_v2(
     )
 
     for chunk in slicer.slice(audio):
-        yield from slice_by_max_duration(chunk, max_duration, rate)
+        sliced_by_max_duration_chunk = slice_by_max_duration(chunk, max_duration, rate)
+        yield from merge_short_chunks(sliced_by_max_duration_chunk, min_duration, max_duration, rate) if useMergeShort else sliced_by_max_duration_chunk
 
 
 def slice_audio_file_v2(
@@ -225,6 +250,8 @@ def slice_audio_file_v2(
     top_db: int = -40,
     hop_length: int = 10,
     max_silence_kept: float = 0.5,
+    useFlat: bool = False,
+    useMergeShort: bool = False,
 ) -> None:
     """
     Slice audio by silence and save to output folder
@@ -254,6 +281,10 @@ def slice_audio_file_v2(
             top_db=top_db,
             hop_length=hop_length,
             max_silence_kept=max_silence_kept,
+            useMergeShort=useMergeShort,
         )
     ):
-        sf.write(str(output_dir / f"{idx:04d}.wav"), sliced, rate)
+        if useFlat:
+            sf.write(str(output_dir) + f"_{idx:04d}.wav"), sliced, rate)
+        else:
+            sf.write(str(output_dir / f"{idx:04d}.wav"), sliced, rate)
