@@ -206,8 +206,8 @@ def slice_audio_v2(
     output_dir: str,
     recursive: bool,
     overwrite: bool,
-    useFlat: bool,
-    useMergeShort: bool,
+    flat: bool,
+    merge_short: bool,
     clean: bool,
     num_workers: int,
     min_duration: float,
@@ -246,7 +246,7 @@ def slice_audio_v2(
                 skipped += 1
                 continue
 
-            if save_path.exists() is False and not useFlat:
+            if save_path.exists() is False and not flat:
                 save_path.mkdir(parents=True)
 
             tasks.append(
@@ -260,8 +260,8 @@ def slice_audio_v2(
                     top_db=top_db,
                     hop_length=hop_length,
                     max_silence_kept=max_silence_kept,
-                    useFlat=useFlat,
-                    useMergeShort=useMergeShort,
+                    useFlat=flat,
+                    useMergeShort=merge_short,
                 )
             )
 
