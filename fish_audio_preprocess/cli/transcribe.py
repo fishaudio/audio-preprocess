@@ -1,5 +1,5 @@
-from concurrent.futures import ProcessPoolExecutor
 import multiprocessing as mp
+from concurrent.futures import ProcessPoolExecutor
 
 import click
 import torch
@@ -59,9 +59,7 @@ def transcribe(input_dir, num_workers, lang, model_size):
     # 按照 num workers 切块
     chunks = split_list(audio_files, num_workers)
 
-    with ProcessPoolExecutor(
-        mp_context=mp.get_context('spawn')
-    ) as executor:
+    with ProcessPoolExecutor(mp_context=mp.get_context("spawn")) as executor:
         tasks = []
         for chunk in chunks:
             tasks.append(
