@@ -143,12 +143,6 @@ def slice_audio(
 @click.option(
     "--overwrite/--no-overwrite", default=False, help="Overwrite existing files"
 )
-@click.option("--flat/--no-flat", default=False, help="Use flat directory structure")
-@click.option(
-    "--merge-short/--no-merge-short",
-    default=False,
-    help="Merge short slices automatically",
-)
 @click.option(
     "--clean/--no-clean", default=False, help="Clean output directory before processing"
 )
@@ -201,13 +195,19 @@ def slice_audio(
     show_default=True,
     type=float,
 )
+@click.option(
+    "--flat-layout/--no-flat-layout", default=False, help="Use flat directory structure"
+)
+@click.option(
+    "--merge-short/--no-merge-short",
+    default=False,
+    help="Merge short slices automatically",
+)
 def slice_audio_v2(
     input_dir: str,
     output_dir: str,
     recursive: bool,
     overwrite: bool,
-    flat: bool,
-    merge_short: bool,
     clean: bool,
     num_workers: int,
     min_duration: float,
@@ -216,6 +216,8 @@ def slice_audio_v2(
     top_db: int,
     hop_length: int,
     max_silence_kept: float,
+    flat_layout: bool,
+    merge_short: bool,
 ):
     """(OpenVPI version) Slice audio files into smaller chunks by silence."""
 
@@ -223,8 +225,9 @@ def slice_audio_v2(
 
     input_dir, output_dir = Path(input_dir), Path(output_dir)
 
-    if flat:
+    if flat_layout:
         logger.info("Using flat directory structure")
+
     if merge_short:
         logger.info("Merging short slices automatically")
 
@@ -251,7 +254,7 @@ def slice_audio_v2(
                 skipped += 1
                 continue
 
-            if save_path.exists() is False and not flat:
+            if save_path.exists() is False and not flat_layout:
                 save_path.mkdir(parents=True)
 
             tasks.append(
@@ -265,8 +268,8 @@ def slice_audio_v2(
                     top_db=top_db,
                     hop_length=hop_length,
                     max_silence_kept=max_silence_kept,
-                    useFlat=flat,
-                    useMergeShort=merge_short,
+                    flat_layout=flat_layout,
+                    merge_short=merge_short,
                 )
             )
 
