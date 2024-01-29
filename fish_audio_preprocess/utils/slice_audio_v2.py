@@ -10,6 +10,24 @@ import soundfile as sf
 from fish_audio_preprocess.utils.slice_audio import slice_by_max_duration
 
 
+def merge_short_chunks(chunks, min_length, max_duration, rate):
+    merging_chunk = np.array([])
+    merged_chunks = []
+    # 将 chunks 安装长度排序, 但是好像没啥用，删了删了
+    # chunks = sorted(chunks, key=lambda x: len(x))
+    for chunk in chunks:
+        if (len(merging_chunk) + len(chunk)) > max_duration * rate and len(
+            merging_chunk
+        ) > 0:
+            merged_chunks.append(merging_chunk)
+            merging_chunk = np.array([])
+        else:
+            merging_chunk = np.concatenate((merging_chunk, chunk))
+    if len(merging_chunk) > 0:
+        merged_chunks.append(merging_chunk)
+    return merged_chunks
+
+
 class Slicer:
     def __init__(
         self,
@@ -182,6 +200,7 @@ def slice_audio_v2(
     top_db: int = -40,
     hop_length: int = 10,
     max_silence_kept: float = 0.5,
+    useMergeShort: bool = False,
 ) -> Iterable[np.ndarray]:
     """Slice audio by silence
 
@@ -200,7 +219,10 @@ def slice_audio_v2(
     """
 
     if len(audio) / rate < min_duration:
-        yield from slice_by_max_duration(audio, max_duration, rate)
+        sliced_by_max_duration_chunk = slice_by_max_duration(chunk, max_duration, rate)
+        yield from merge_short_chunks(
+            sliced_by_max_duration_chunk, min_duration, max_duration, rate
+        ) if useMergeShort else sliced_by_max_duration_chunk
         return
 
     slicer = Slicer(
@@ -212,8 +234,15 @@ def slice_audio_v2(
         max_sil_kept=max_silence_kept * 1000,
     )
 
-    for chunk in slicer.slice(audio):
-        yield from slice_by_max_duration(chunk, max_duration, rate)
+    sliced_audio = slicer.slice(audio)
+    if useMergeShort:
+        sliced_audio = merge_short_chunks(
+            sliced_audio, min_duration, max_duration, rate
+        )
+
+    for chunk in sliced_audio:
+        sliced_by_max_duration_chunk = slice_by_max_duration(chunk, max_duration, rate)
+        yield from sliced_by_max_duration_chunk
 
 
 def slice_audio_file_v2(
@@ -225,6 +254,8 @@ def slice_audio_file_v2(
     top_db: int = -40,
     hop_length: int = 10,
     max_silence_kept: float = 0.5,
+    useFlat: bool = False,
+    useMergeShort: bool = False,
 ) -> None:
     """
     Slice audio by silence and save to output folder
@@ -254,6 +285,10 @@ def slice_audio_file_v2(
             top_db=top_db,
             hop_length=hop_length,
             max_silence_kept=max_silence_kept,
+            useMergeShort=useMergeShort,
         )
     ):
-        sf.write(str(output_dir / f"{idx:04d}.wav"), sliced, rate)
+        if useFlat:
+            sf.write(str(output_dir) + f"_{idx:04d}.wav", sliced, rate)
+        else:
+            sf.write(str(output_dir / f"{idx:04d}.wav"), sliced, rate)
