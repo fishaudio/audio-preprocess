@@ -10,7 +10,7 @@ import soundfile as sf
 from fish_audio_preprocess.utils.slice_audio import slice_by_max_duration
 
 
-def merge_short_chunks(chunks, min_length, max_duration, rate):
+def merge_short_chunks(chunks, max_duration, rate):
     merged_chunks = []
     buffer, length = [], 0
 
@@ -222,7 +222,7 @@ def slice_audio_v2(
     if len(audio) / rate < min_duration:
         sliced_by_max_duration_chunk = slice_by_max_duration(audio, max_duration, rate)
         yield from merge_short_chunks(
-            sliced_by_max_duration_chunk, min_duration, max_duration, rate
+            sliced_by_max_duration_chunk, max_duration, rate
         ) if merge_short else sliced_by_max_duration_chunk
         return
 
@@ -238,7 +238,7 @@ def slice_audio_v2(
     sliced_audio = slicer.slice(audio)
     if merge_short:
         sliced_audio = merge_short_chunks(
-            sliced_audio, min_duration, max_duration, rate
+            sliced_audio, max_duration, rate
         )
 
     for chunk in sliced_audio:

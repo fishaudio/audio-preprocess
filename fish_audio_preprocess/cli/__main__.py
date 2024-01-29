@@ -10,6 +10,7 @@ from .resample import resample
 from .separate_audio import separate
 from .slice_audio import slice_audio, slice_audio_v2
 from .transcribe import transcribe
+from .merge_short import merge_short
 
 
 @click.group()
@@ -33,6 +34,7 @@ cli.add_command(slice_audio)
 cli.add_command(slice_audio_v2)
 cli.add_command(resample)
 cli.add_command(transcribe)
+cli.add_command(merge_short)
 
 
 if __name__ == "__main__":
