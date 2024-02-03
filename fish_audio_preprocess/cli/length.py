@@ -1,12 +1,22 @@
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 from typing import Optional
 
 import click
 from loguru import logger
 from tqdm import tqdm
-
+import soundfile as sf
+from matplotlib import pyplot as plt
 from fish_audio_preprocess.utils.file import AUDIO_EXTENSIONS, list_files
 
+def process_one(file, input_dir):
+    sound = sf.SoundFile(str(file))
+    return (
+        len(sound),
+        sound.samplerate,
+        len(sound) / sound.samplerate,
+        file.relative_to(input_dir),
+    )
 
 @click.command()
 @click.argument("input_dir", type=click.Path(exists=True, file_okay=False))
@@ -35,24 +45,23 @@ def length(
     Get the length of all audio files in a directory
     """
 
-    import soundfile as sf
-    from matplotlib import pyplot as plt
-
     input_dir = Path(input_dir)
     files = list_files(input_dir, AUDIO_EXTENSIONS, recursive=recursive)
     logger.info(f"Found {len(files)} files, calculating length")
 
     infos = []
-    for file in tqdm(files, desc="Collecting infos"):
-        sound = sf.SoundFile(str(file))
-        infos.append(
-            (
-                len(sound),
-                sound.samplerate,
-                len(sound) / sound.samplerate,
-                file.relative_to(input_dir),
+
+
+    with ProcessPoolExecutor(max_workers=10) as executor:
+        tasks = []
+        for file in tqdm(files, desc="Preparing"):
+            tasks.append(
+                executor.submit(
+                    process_one, file, input_dir
+                )
             )
-        )
+        for task in tqdm(tasks, desc="Processing"):
+            infos.append(task.result())
 
     # Duration
     total_duration = sum(i[2] for i in infos)
