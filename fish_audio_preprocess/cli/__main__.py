@@ -6,11 +6,11 @@ from .convert_to_wav import to_wav
 from .frequency import frequency
 from .length import length
 from .loudness_norm import loudness_norm
+from .merge_short import merge_short
 from .resample import resample
 from .separate_audio import separate
 from .slice_audio import slice_audio, slice_audio_v2
 from .transcribe import transcribe
-from .merge_short import merge_short
 
 
 @click.group()

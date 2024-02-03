@@ -237,9 +237,7 @@ def slice_audio_v2(
 
     sliced_audio = slicer.slice(audio)
     if merge_short:
-        sliced_audio = merge_short_chunks(
-            sliced_audio, max_duration, rate
-        )
+        sliced_audio = merge_short_chunks(sliced_audio, max_duration, rate)
 
     for chunk in sliced_audio:
         sliced_by_max_duration_chunk = slice_by_max_duration(chunk, max_duration, rate)
