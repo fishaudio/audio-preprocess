@@ -248,14 +248,22 @@ def slice_audio_v2(
         for file in tqdm(files, desc="Preparing tasks"):
             # Get relative path to input_dir
             relative_path = file.relative_to(input_dir)
-            save_path = output_dir / relative_path.parent / relative_path.stem 
+            save_path = output_dir / relative_path.parent / relative_path.stem
 
             if save_path.exists() and not overwrite:
                 skipped += 1
                 continue
 
-            if (output_dir / relative_path.parent / relative_path.stem if not flat_layout else output_dir / relative_path.parent).exists() is False:
-                (output_dir / relative_path.parent / relative_path.stem if not flat_layout else output_dir / relative_path.parent).mkdir(parents=True)
+            if (
+                output_dir / relative_path.parent / relative_path.stem
+                if not flat_layout
+                else output_dir / relative_path.parent
+            ).exists() is False:
+                (
+                    output_dir / relative_path.parent / relative_path.stem
+                    if not flat_layout
+                    else output_dir / relative_path.parent
+                ).mkdir(parents=True)
 
             tasks.append(
                 executor.submit(
