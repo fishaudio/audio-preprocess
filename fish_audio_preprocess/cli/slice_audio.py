@@ -254,8 +254,16 @@ def slice_audio_v2(
                 skipped += 1
                 continue
 
-            if save_path.exists() is False and not flat_layout:
-                save_path.mkdir(parents=True)
+            if (
+                output_dir / relative_path.parent / relative_path.stem
+                if not flat_layout
+                else output_dir / relative_path.parent
+            ).exists() is False:
+                (
+                    output_dir / relative_path.parent / relative_path.stem
+                    if not flat_layout
+                    else output_dir / relative_path.parent
+                ).mkdir(parents=True)
 
             tasks.append(
                 executor.submit(
