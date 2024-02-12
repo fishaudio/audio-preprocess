@@ -48,7 +48,7 @@ def length(
     """
     import soundfile as sf
     from matplotlib import pyplot as plt
-    input_dir = Path(input_dir
+    input_dir = Path(input_dir)
     files = list_files(input_dir, AUDIO_EXTENSIONS, recursive=recursive)
     logger.info(f"Found {len(files)} files, calculating length")
 
