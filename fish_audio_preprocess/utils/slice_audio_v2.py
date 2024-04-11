@@ -9,7 +9,6 @@ import soundfile as sf
 
 from fish_audio_preprocess.utils.slice_audio import slice_by_max_duration
 
-
 # def merge_short_chunks(chunks, max_duration, rate):
 #     merged_chunks = []
 #     buffer, length = [], 0
@@ -27,19 +26,22 @@ from fish_audio_preprocess.utils.slice_audio import slice_by_max_duration
 
 #     return merged_chunks
 
+
 def merge_short_chunks(chunks, max_duration, rate):
     if not chunks:
         return []
-    
-    max_length = int(max_duration * rate)  
+
+    max_length = int(max_duration * rate)
     merged = []
-    current = chunks[0]  
-    for chunk in chunks[1:]:  
+    current = chunks[0]
+    for chunk in chunks[1:]:
         if len(current) + len(chunk) <= max_length:
-            current = np.concatenate((current, np.zeros(int(0.1*rate)), chunk))  # 在合并前后加入一个0.1s作为间隔
+            current = np.concatenate(
+                (current, np.zeros(int(0.1 * rate)), chunk)
+            )  # 在合并前后加入一个0.1s作为间隔
         else:
             merged.append(current)
-            current = chunk  
+            current = chunk
 
     merged.append(current)  # 添加最后一个块
     return merged
