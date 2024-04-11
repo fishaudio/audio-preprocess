@@ -10,22 +10,39 @@ import soundfile as sf
 from fish_audio_preprocess.utils.slice_audio import slice_by_max_duration
 
 
+# def merge_short_chunks(chunks, max_duration, rate):
+#     merged_chunks = []
+#     buffer, length = [], 0
+
+#     for chunk in chunks:
+#         if length + len(chunk) > max_duration * rate and len(buffer) > 0:
+#             merged_chunks.append(np.concatenate(buffer))
+#             buffer, length = [], 0
+#         else:
+#             buffer.append(chunk)
+#             length += len(chunk)
+
+#     if len(buffer) > 0:
+#         merged_chunks.append(np.concatenate(buffer))
+
+#     return merged_chunks
+
 def merge_short_chunks(chunks, max_duration, rate):
-    merged_chunks = []
-    buffer, length = [], 0
-
-    for chunk in chunks:
-        if length + len(chunk) > max_duration * rate and len(buffer) > 0:
-            merged_chunks.append(np.concatenate(buffer))
-            buffer, length = [], 0
+    if not chunks:
+        return []
+    
+    max_length = int(max_duration * rate)  
+    merged = []
+    current = chunks[0]  
+    for chunk in chunks[1:]:  
+        if len(current) + len(chunk) <= max_length:
+            current = np.concatenate((current, np.zeros(int(0.1*rate)), chunk))  # 在合并前后加入一个0.1s作为间隔
         else:
-            buffer.append(chunk)
-            length += len(chunk)
+            merged.append(current)
+            current = chunk  
 
-    if len(buffer) > 0:
-        merged_chunks.append(np.concatenate(buffer))
-
-    return merged_chunks
+    merged.append(current)  # 添加最后一个块
+    return merged
 
 
 class Slicer:
