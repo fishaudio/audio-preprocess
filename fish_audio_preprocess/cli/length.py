@@ -11,6 +11,7 @@ from fish_audio_preprocess.utils.file import AUDIO_EXTENSIONS, list_files
 
 def process_one(file, input_dir):
     import soundfile as sf
+
     sound = sf.SoundFile(str(file))
     return (
         len(sound),
@@ -48,6 +49,7 @@ def length(
     """
     import soundfile as sf
     from matplotlib import pyplot as plt
+
     input_dir = Path(input_dir)
     files = list_files(input_dir, AUDIO_EXTENSIONS, recursive=recursive)
     logger.info(f"Found {len(files)} files, calculating length")
