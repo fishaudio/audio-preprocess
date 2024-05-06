@@ -1,7 +1,8 @@
 from functools import partial
+from multiprocessing import Pool
 from pathlib import Path
 from typing import Optional
-from multiprocessing import Pool
+
 import click
 from loguru import logger
 from tqdm import tqdm
@@ -26,11 +27,27 @@ def process_one(file, input_dir):
     )
 
 
+def process_one_accurate(file, input_dir):
+    import torchaudio
+
+    try:
+        y, sr = torchaudio.load(str(file), backend="sox")
+        return y.size(-1), sr, y.size(-1) / sr, file.relative_to(input_dir)
+    except Exception as e:
+        logger.warning(f"Error reading {file}: {e}")
+        return None
+
+
 @click.command()
 @click.argument("input_dir", type=click.Path(exists=True, file_okay=False))
 @click.option("--recursive/--no-recursive", default=True, help="Search recursively")
 @click.option(
     "--visualize/--no-visualize", default=False, help="Visualize the distribution"
+)
+@click.option(
+    "--accurate/--no-accurate",
+    default=False,
+    help="Use accurate mode for duration calculation",
 )
 @click.option(
     "-l", "--long-threshold", default=None, type=float, help="Threshold for long files"
@@ -53,6 +70,7 @@ def length(
     input_dir: str,
     recursive: bool,
     visualize: bool,
+    accurate: bool,
     long_threshold: Optional[float],
     short_threshold: Optional[float],
     num_workers: int,
@@ -67,7 +85,9 @@ def length(
     logger.info(f"Found {len(files)} files, calculating length")
 
     infos = []
-    process_one_partial = partial(process_one, input_dir=input_dir)
+    process_one_partial = partial(
+        process_one_accurate if accurate else process_one, input_dir=input_dir
+    )
 
     with Pool(processes=num_workers) as executor:
         for res in tqdm(
