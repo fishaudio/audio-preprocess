@@ -17,7 +17,9 @@ def batch_transcribe(files: list[Path], model_size: str, lang: str, pos: int):
         model = whisper.load_model(model_size)
         for file in tqdm(files, position=pos):
             if lang in PROMPT:
-                result = model.transcribe(file, language=lang, initial_prompt=PROMPT[lang])
+                result = model.transcribe(
+                    file, language=lang, initial_prompt=PROMPT[lang]
+                )
             else:
                 result = model.transcribe(file, language=lang)
             results[str(file)] = result["text"]
