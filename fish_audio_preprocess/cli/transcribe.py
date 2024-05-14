@@ -32,12 +32,23 @@ def replace_lastest(string, old, new):
 )
 @click.option(
     "--model-size",
-    help="whisper model size",
+    help="whisper model size or funasr",
     default="tiny",
     show_default=True,
     type=str,
 )
-def transcribe(input_dir, num_workers, lang, model_size):
+@click.option(
+    "--recursive/--no-recursive",
+    default=False,
+    help="Search recursively",
+)
+def transcribe(
+    input_dir: str,
+    num_workers: int,
+    lang: str,
+    model_size: str,
+    recursive: bool,
+):
     """
     Transcribe audio files in a directory.
     """
@@ -49,7 +60,7 @@ def transcribe(input_dir, num_workers, lang, model_size):
 
     logger.info(f"Transcribing audio files in {input_dir}")
     # 扫描出所有的音频文件
-    audio_files = list_files(input_dir)
+    audio_files = list_files(input_dir, recursive=recursive)
     audio_files = [str(file) for file in audio_files if file.suffix in AUDIO_EXTENSIONS]
 
     if len(audio_files) == 0:
