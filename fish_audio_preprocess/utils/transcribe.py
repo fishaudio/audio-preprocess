@@ -10,14 +10,30 @@ PROMPT = {
 
 
 def batch_transcribe(files: list[Path], model_size: str, lang: str, pos: int):
-    import whisper
-
-    model = whisper.load_model(model_size)
     results = {}
-    for file in tqdm(files, position=pos):
-        if lang in PROMPT:
-            result = model.transcribe(file, language=lang, initial_prompt=PROMPT[lang])
-        else:
-            result = model.transcribe(file, language=lang)
-        results[str(file)] = result["text"]
+    if "funasr" not in model_size:
+        import whisper
+
+        model = whisper.load_model(model_size)
+        for file in tqdm(files, position=pos):
+            if lang in PROMPT:
+                result = model.transcribe(
+                    file, language=lang, initial_prompt=PROMPT[lang]
+                )
+            else:
+                result = model.transcribe(file, language=lang)
+            results[str(file)] = result["text"]
+    else:
+        from funasr import AutoModel
+
+        model = AutoModel(
+            model="paraformer-zh",
+            punc_model="ct-punc",
+            log_level="ERROR",
+            disable_pbar=True,
+        )
+        for file in tqdm(files, position=pos):
+            result = model.generate(input=file, batch_size_s=300)
+            results[str(file)] = result[0]["text"]
+
     return results
