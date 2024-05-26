@@ -7,7 +7,7 @@ from loguru import logger
 from tqdm import tqdm
 
 from fish_audio_preprocess.utils.file import AUDIO_EXTENSIONS, list_files, split_list
-from fish_audio_preprocess.utils.transcribe import batch_transcribe
+from fish_audio_preprocess.utils.transcribe import ASRModelType, batch_transcribe
 
 
 def replace_lastest(string, old, new):
@@ -32,8 +32,9 @@ def replace_lastest(string, old, new):
 )
 @click.option(
     "--model-size",
-    help="whisper model size or funasr",
-    default="tiny",
+    # whisper 默认 medium, funasr 默认 paraformer-zh
+    help="asr model size(default medium for whisper, paraformer-zh for funasr)",
+    default="medium",
     show_default=True,
     type=str,
 )
@@ -42,22 +43,41 @@ def replace_lastest(string, old, new):
     default=False,
     help="Search recursively",
 )
+@click.option(
+    "--model-type",
+    help="ASR model type (funasr or whisper)",
+    default="whisper",
+    show_default=True,
+)
 def transcribe(
     input_dir: str,
     num_workers: int,
     lang: str,
     model_size: str,
     recursive: bool,
+    model_type: ASRModelType,
 ):
     """
     Transcribe audio files in a directory.
     """
+    ctx = click.get_current_context()
+    provided_options = {
+        key: value
+        for key, value in ctx.params.items()
+        if ctx.get_parameter_source(key) == click.core.ParameterSource.COMMANDLINE
+    }
+
+    # 如果是 funasr 且没有提供 model_size, 则默认为 paraformer-zh
+    if model_type == "funasr" and "model_size" not in provided_options:
+        logger.info("Using paraformer-zh model for funasr as default")
+        model_size = "paraformer-zh"
+
     if not torch.cuda.is_available():
         logger.warning(
             "CUDA is not available, using CPU. This will be slow and even this script can not work. "
             "To speed up, use a GPU enabled machine or install torch with cuda builtin."
         )
-
+    logger.info(f"Using {num_workers} workers for processing")
     logger.info(f"Transcribing audio files in {input_dir}")
     # 扫描出所有的音频文件
     audio_files = list_files(input_dir, recursive=recursive)
@@ -78,6 +98,7 @@ def transcribe(
                     batch_transcribe,
                     files=chunk,
                     model_size=model_size,
+                    model_type=model_type,
                     lang=lang,
                     pos=len(tasks),
                 )

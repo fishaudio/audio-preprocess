@@ -13,6 +13,8 @@
 - [x] 音频数据统计（支持判断音频长度）
 - [x] 音频重采样
 - [x] 音频打标 (.lab)
+- [x] 音频打标 FunASR（使用 `--model-type funasr` 开启, 详细使用方法可查看代码）
+- [ ] 音频打标 WhisperX
 
 ([ ] 表示未完成, [x] 表示已完成)
 
@@ -21,11 +23,10 @@
 ## 上手指南:
 
 ```
-pip install -e . 
+pip install -e .
 fap --help
 ```
 
 ## 引用
 
 - [Batch Whisper](https://github.com/Blair-Johnson/batch-whisper)
-
