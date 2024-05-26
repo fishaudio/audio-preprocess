@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Literal
 
 from loguru import logger
-
 from tqdm import tqdm
 
 PROMPT = {
