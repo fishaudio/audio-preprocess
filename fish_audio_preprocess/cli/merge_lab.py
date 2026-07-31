@@ -24,7 +24,9 @@ def merge_lab(
     recursive: bool,
 ):
     audio_files = list_files(input_dir, recursive=recursive)
-    audio_files = [str(file) for file in audio_files if file.suffix in AUDIO_EXTENSIONS]
+    audio_files = [
+        str(file) for file in audio_files if file.suffix.lower() in AUDIO_EXTENSIONS
+    ]
     results = []
     for audio_file in tqdm(audio_files):
         # logger.info(f"Processing {audio_file}")
