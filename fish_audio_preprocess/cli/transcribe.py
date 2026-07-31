@@ -95,7 +95,9 @@ def transcribe(
     logger.info(f"Transcribing audio files in {input_dir}")
     # 扫描出所有的音频文件
     audio_files = list_files(input_dir, recursive=recursive)
-    audio_files = [str(file) for file in audio_files if file.suffix in AUDIO_EXTENSIONS]
+    audio_files = [
+        str(file) for file in audio_files if file.suffix.lower() in AUDIO_EXTENSIONS
+    ]
 
     if len(audio_files) == 0:
         logger.error(f"No audio files found in {input_dir}.")

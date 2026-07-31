@@ -72,7 +72,11 @@ def list_files(
     )
 
     if extensions is not None:
-        files = [f for f in files if f.suffix in extensions]
+        # Match case-insensitively. Recorders, cameras and phones routinely
+        # write .WAV/.MP3/.MP4, and Path.suffix preserves that case, so an
+        # exact match silently skipped those files.
+        extensions = {ext.lower() for ext in extensions}
+        files = [f for f in files if f.suffix.lower() in extensions]
 
     if sort:
         files = sorted(files)
